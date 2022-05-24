@@ -6,7 +6,6 @@ from django.forms import ModelForm
 from django.forms.widgets import TextInput
 from django.utils.safestring import mark_safe
 from sic.models import *
-from sic.mail import Digest
 from sic.moderation import ModerationLogEntry
 from sic.jobs import Job, JobKind
 from sic.webmention import Webmention
@@ -76,7 +75,6 @@ class StoryAdmin(ModelAdmin):
         "kind_html",
         "tags_html",
         "created",
-        "url",
         "last_modified",
         "karma",
         "message_id",
@@ -225,16 +223,6 @@ class DomainFilterAdmin(MatchFilterAdmin):
     pass
 
 
-class DigestAdmin(ModelAdmin):
-    ordering = ["-id"]
-    list_display = ["user", "active", "all_stories", "last_run"]
-
-
-class StoryRemoteContentAdmin(ModelAdmin):
-    ordering = ["-retrieved_at"]
-    list_display = ["story", "url", "retrieved_at"]
-
-
 class TaggregationHasTagAdmin(ModelAdmin):
     ordering = ["-id"]
     list_display = ["taggregation", "tag", "depth"]
@@ -337,7 +325,6 @@ class JobKindAdmin(ModelAdmin):
 
 
 admin.site.register(Comment, CommentAdmin)
-admin.site.register(Digest, DigestAdmin)
 admin.site.register(Domain, DomainAdmin)
 admin.site.register(Hat, HatAdmin)
 admin.site.register(Invitation, InvitationAdmin)
@@ -346,7 +333,6 @@ admin.site.register(Moderation)
 admin.site.register(Notification, NotificationAdmin)
 admin.site.register(Story, StoryAdmin)
 admin.site.register(StoryKind, StoryKindAdmin)
-admin.site.register(StoryRemoteContent, StoryRemoteContentAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(StoryFilter, StoryFilterAdmin)
 admin.site.register(ExactTagFilter, ExactTagFilterAdmin)

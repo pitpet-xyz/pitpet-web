@@ -14,7 +14,7 @@ from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonRespo
 from django.apps import apps
 
 config = apps.get_app_config("sic")
-from sic.models import Story, StoryKind, Comment, Notification, StoryRemoteContent, Tag
+from sic.models import Story, StoryKind, Comment, Notification, Tag
 from sic.forms import (
     SubmitCommentForm,
     SubmitStoryForm,
@@ -89,58 +89,6 @@ def story(request, story_pk, slug=None):
             "comments": comments,
             "ongoing_reply_pk": ongoing_reply_pk,
         },
-    )
-
-
-@require_safe
-def story_remote_content(request, story_pk, slug=None):
-    try:
-        story_obj = Story.objects.get(pk=story_pk)
-    except Story.DoesNotExist:
-        raise Http404("Story does not exist") from Story.DoesNotExist
-    if slug != story_obj.slugify:
-        return redirect(
-            reverse(
-                "story_remote_content",
-                kwargs={"story_pk": story_pk, "slug": story_obj.slugify},
-            )
-        )
-    try:
-        content_obj = story_obj.remote_content
-    except StoryRemoteContent.DoesNotExist:
-        raise Http404(
-            "Story content has not been locally cached."
-        ) from StoryRemoteContent.DoesNotExist
-    return HttpResponse(
-        f"Remote-Url: {content_obj.url}\nRetrieved-at: {content_obj.retrieved_at}\n\n{content_obj.content}",
-        content_type="text/plain; charset=utf-8",
-    )
-
-
-@require_safe
-def story_remote_content_formatted(request, story_pk, slug=None):
-    try:
-        story_obj = Story.objects.get(pk=story_pk)
-    except Story.DoesNotExist:
-        raise Http404("Story does not exist") from Story.DoesNotExist
-    if slug != story_obj.slugify:
-        return redirect(
-            reverse(
-                "story_remote_content_formatted",
-                kwargs={"story_pk": story_pk, "slug": story_obj.slugify},
-            )
-        )
-    try:
-        content_obj = story_obj.remote_content
-        if not content_obj.w3m_content:
-            raise StoryRemoteContent.DoesNotExist
-    except StoryRemoteContent.DoesNotExist:
-        raise Http404(
-            "Story content has not been locally cached."
-        ) from StoryRemoteContent.DoesNotExist
-    return HttpResponse(
-        f"Remote-Url: {content_obj.url}\nRetrieved-at: {content_obj.retrieved_at}\n\n{content_obj.w3m_content}",
-        content_type="text/plain; charset=utf-8",
     )
 
 
@@ -265,12 +213,8 @@ def submit_story(request):
             form = SubmitStoryForm(request.POST)
             form.is_valid()
             preview = {
-                "description": comment_to_html(request.POST["description"]),
+                "content": comment_to_html(request.POST["content"]),
                 "title": form.cleaned_data["title"],
-                "url": form.cleaned_data["url"],
-                "domain": form.cleaned_data["url"]
-                if len(form.cleaned_data["url"]) > 0
-                else None,
                 "publish_date": form.cleaned_data["publish_date"],
                 "tags": form.cleaned_data["tags"],
             }
@@ -279,34 +223,15 @@ def submit_story(request):
             form.fields["title"].required = True
             if form.is_valid():
                 title = form.cleaned_data["title"]
-                description = form.cleaned_data["description"]
-                url = form.cleaned_data["url"]
+                content = form.cleaned_data["content"]
                 publish_date = form.cleaned_data["publish_date"]
                 user_is_author = form.cleaned_data["user_is_author"]
-                if url and config.DISALLOW_REPOSTS_PERIOD is not None:
-                    previous_post = (
-                        Story.objects.filter(url=url).order_by("-created").first()
-                    )
-                    if previous_post:
-                        now = make_aware(datetime.now())
-                        if (
-                            now - previous_post.created
-                        ) < config.DISALLOW_REPOSTS_PERIOD:
-                            messages.add_message(
-                                request,
-                                messages.ERROR,
-                                f"This URL has been submitted recently and you cannot repost it until it's at least {config.DISALLOW_REPOSTS_PERIOD} hours old.",
-                            )
-                            return redirect(previous_post.get_absolute_url())
-
-                if not url and description:
-                    user_is_author = True
+                user_is_author = True
 
                 new_story = Story.objects.create(
                     title=title,
-                    url=url,
                     publish_date=publish_date,
-                    description=description,
+                    content=content,
                     user=user,
                     user_is_author=user_is_author,
                     content_warning=form.cleaned_data["content_warning"],
@@ -432,10 +357,8 @@ def edit_story(request, story_pk, slug=None):
             form = EditStoryForm(request.POST)
             form.is_valid()
             preview = {
-                "description": comment_to_html(request.POST["description"]),
+                "content": comment_to_html(request.POST["content"]),
                 "title": form.cleaned_data["title"],
-                "url": form.cleaned_data["url"],
-                "domain": form.cleaned_data["url"],
                 "publish_date": form.cleaned_data["publish_date"],
                 "tags": form.cleaned_data["tags"],
             }
@@ -443,16 +366,14 @@ def edit_story(request, story_pk, slug=None):
             form = EditStoryForm(request.POST)
             if form.is_valid():
                 title_before = story_obj.title
-                desc_before = story_obj.description
-                url_before = story_obj.url
+                cont_before = story_obj.content
                 cw_before = story_obj.content_warning
                 pubdate_before = story_obj.publish_date
                 tags_before = list(story_obj.tags.all())
                 kinds_before = list(story_obj.kind.all())
 
                 story_obj.title = form.cleaned_data["title"]
-                story_obj.description = form.cleaned_data["description"]
-                story_obj.url = form.cleaned_data["url"]
+                story_obj.content = form.cleaned_data["content"]
                 story_obj.user_is_author = form.cleaned_data["user_is_author"]
                 story_obj.tags.set(form.cleaned_data["tags"])
                 story_obj.kind.set(form.cleaned_data["kind"])
@@ -463,13 +384,9 @@ def edit_story(request, story_pk, slug=None):
                     ModerationLogEntry.edit_story_title(
                         title_before, story_obj, user, form.cleaned_data["reason"]
                     )
-                if desc_before != form.cleaned_data["description"]:
+                if cont_before != form.cleaned_data["content"]:
                     ModerationLogEntry.edit_story_desc(
-                        desc_before, story_obj, user, form.cleaned_data["reason"]
-                    )
-                if url_before != form.cleaned_data["url"]:
-                    ModerationLogEntry.edit_story_url(
-                        url_before, story_obj, user, form.cleaned_data["reason"]
+                        cont_before, story_obj, user, form.cleaned_data["reason"]
                     )
                 if cw_before != form.cleaned_data["content_warning"]:
                     ModerationLogEntry.edit_story_cw(
@@ -498,8 +415,7 @@ def edit_story(request, story_pk, slug=None):
         form = EditStoryForm(
             initial={
                 "title": story_obj.title,
-                "description": story_obj.description,
-                "url": story_obj.url,
+                "content": story_obj.content,
                 "publish_date": story_obj.publish_date,
                 "user_is_author": story_obj.user_is_author,
                 "tags": story_obj.tags.all(),

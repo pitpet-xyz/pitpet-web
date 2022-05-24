@@ -484,7 +484,7 @@ class EditAccountSettings(forms.Form):
     enable_mailing_list = forms.BooleanField(
         initial=False,
         required=False,
-        help_text="Enabling this option will result in subscribed stories being mailed to you. To receive stories in less frequent batches enable the weekly digest settings instead. To also receive comments and be able to reply to them refer to other settings.",
+        help_text="Enabling this option will result in subscribed stories being mailed to you. To also receive comments and be able to reply to them refer to other settings.",
         disabled=not config.MAILING_LIST,
         widget=forms.CheckboxInput if config.MAILING_LIST else forms.HiddenInput,
     )
@@ -554,63 +554,6 @@ class EditAccountSettings(forms.Form):
         if exists.count():
             raise ValidationError("Email already exists")
         return email
-
-
-class WeeklyDigestForm(forms.Form):
-    active = forms.BooleanField(
-        required=False,
-    )
-    all_stories = forms.BooleanField(
-        required=False,
-        help_text="If false, only stories from subscribed aggregations will be considered for the digest.",
-    )
-    last_run = forms.DateField(
-        required=False,
-        widget=forms.DateInput(attrs={"type": "date"}),
-        help_text="The last time a digest was sent. Clear to receive it again, or set to other date to change what stories you will receive in your next digest.",
-    )
-    on_monday = forms.BooleanField(
-        required=False,
-    )
-    on_tuesday = forms.BooleanField(
-        required=False,
-    )
-    on_wednesday = forms.BooleanField(
-        required=False,
-    )
-    on_thursday = forms.BooleanField(
-        required=False,
-    )
-    on_friday = forms.BooleanField(
-        required=False,
-    )
-    on_saturday = forms.BooleanField(
-        required=False,
-    )
-    on_sunday = forms.BooleanField(
-        required=False,
-    )
-
-    def calculate_on_days(self):
-        if not self.is_valid():
-            return None
-        return functools.reduce(
-            operator.__or__,
-            map(
-                lambda t: (1 if self.cleaned_data[t[1]] else 0) << t[0],
-                enumerate(
-                    [
-                        "on_monday",
-                        "on_tuesday",
-                        "on_wednesday",
-                        "on_thursday",
-                        "on_friday",
-                        "on_saturday",
-                        "on_sunday",
-                    ]
-                ),
-            ),
-        )
 
 
 class EditSessionSettings(forms.Form):

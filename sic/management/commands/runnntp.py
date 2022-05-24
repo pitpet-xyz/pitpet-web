@@ -229,11 +229,11 @@ class SicNNTPServer(NNTPServer, collections.abc.Mapping):
                     story.created,
                     key,
                     "",
-                    len(story.url) if story.url else len(story.description),
+                    len(story.content),
                     1,
                     {"URL": f"{config.get_domain()}{story.get_absolute_url()}"},
                 ),
-                story.url if story.url else story.description,
+                story.content,
             )
         except Exception as exc:
             # print("Exception,", exc)

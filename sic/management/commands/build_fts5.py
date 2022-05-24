@@ -19,6 +19,6 @@ class Command(BaseCommand):
         comments = Comment.objects.filter(deleted=False)
         for c in comments:
             index_comment(c)
-        stories = Story.objects.filter(active=True, merged_into=None)
+        stories = Story.objects.filter(active=True)
         for s in stories:
             index_story(s)

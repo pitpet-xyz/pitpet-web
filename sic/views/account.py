@@ -36,13 +36,11 @@ from sic.models import (
     ExactTagFilter,
     DomainFilter,
 )
-from sic.mail import Digest
 from sic.forms import (
     GenerateInviteForm,
     EditProfileForm,
     EditAvatarForm,
     EditAccountSettings,
-    WeeklyDigestForm,
     EditSessionSettings,
     EditHatForm,
     UserCreationForm,
@@ -624,8 +622,7 @@ def bookmarks_json(request):
             "id": b.story.pk,
             "user": str(b.story.user),
             "title": b.story.title,
-            "description": b.story.description_to_plain_text,
-            "url": b.story.url,
+            "content": b.story.content_to_plain_text,
             "sic_url": f"http{tls}://{domain}{b.story.get_absolute_url()}",
             "created": b.story.created,
             "publish_date": b.story.publish_date,
@@ -779,7 +776,6 @@ def edit_settings(request):
     }
     form = None
     session_form = None
-    digest_form = None
     if request.method == "POST":
         if "session-settings" in request.POST:
             session_form = EditSessionSettings(request.POST)
@@ -793,22 +789,6 @@ def edit_settings(request):
                 )
                 return redirect(reverse("account"))
             error = form_errors_as_string(session_form.errors)
-        elif "digest-form" in request.POST:
-            digest_form = WeeklyDigestForm(request.POST)
-            if digest_form.is_valid():
-                digest, _ = Digest.objects.get_or_create(user=user)
-                digest.on_days = digest_form.calculate_on_days()
-                digest.active = digest_form.cleaned_data["active"]
-                digest.all_stories = digest_form.cleaned_data["all_stories"]
-                digest.last_run = digest_form.cleaned_data["last_run"]
-                digest.save()
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    "Email digest settings updated successfully.",
-                )
-                return redirect(reverse("account"))
-            error = form_errors_as_string(digest_form.errors)
         else:
             form = EditAccountSettings(request.POST)
             if form.is_valid():
@@ -846,31 +826,6 @@ def edit_settings(request):
         form = EditAccountSettings(initial=initial)
     if session_form is None:
         session_form = EditSessionSettings(initial=session_settings)
-    if digest_form is None:
-        digest, _ = Digest.objects.get_or_create(user=user)
-        initial = {
-            "active": digest.active,
-            "all_stories": digest.all_stories,
-            "last_run": digest.last_run,
-        }
-        initial.update(
-            {
-                d[1]: d[0]
-                for d in zip(
-                    digest.days_list,
-                    [
-                        "on_monday",
-                        "on_tuesday",
-                        "on_wednesday",
-                        "on_thursday",
-                        "on_friday",
-                        "on_saturday",
-                        "on_sunday",
-                    ],
-                )
-            }
-        )
-        digest_form = WeeklyDigestForm(initial=initial)
     return render(
         request,
         "account/edit_settings.html",
@@ -878,7 +833,6 @@ def edit_settings(request):
             "user": user,
             "form": form,
             "session_form": session_form,
-            "digest_form": digest_form,
         },
     )
 
@@ -1047,18 +1001,12 @@ def new_invitation_request(request):
 @transaction.atomic
 def welcome(request):
     avatar_form = None
-    digest_form = None
     edit_profile_form = None
     user = request.user
     if request.method == "POST":
         avatar_form = EditAvatarForm(request.POST, request.FILES)
         edit_profile_form = EditProfileForm(request.POST)
-        digest_form = WeeklyDigestForm(request.POST)
-        if (
-            avatar_form.is_valid()
-            and edit_profile_form.is_valid()
-            and digest_form.is_valid()
-        ):
+        if avatar_form.is_valid() and edit_profile_form.is_valid():
             img = avatar_form.cleaned_data["new_avatar"]
             avatar_title = avatar_form.cleaned_data["avatar_title"]
             if img:
@@ -1074,11 +1022,6 @@ def welcome(request):
                 user._wrapped.__dict__[field] = edit_profile_form.cleaned_data[field]
                 user._wrapped.__dict__[label] = edit_profile_form.cleaned_data[label]
             user.save()
-            digest, _ = Digest.objects.get_or_create(user=user)
-            digest.on_days = digest_form.calculate_on_days()
-            digest.active = digest_form.cleaned_data["active"]
-            digest.all_stories = digest_form.cleaned_data["all_stories"]
-            digest.save()
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -1086,7 +1029,7 @@ def welcome(request):
             )
             return redirect(reverse("help"))
         error = []
-        for form in [avatar_form, digest_form, edit_profile_form]:
+        for form in [avatar_form, edit_profile_form]:
             if not form.is_valid():
                 error.append(form_errors_as_string(form.errors))
         messages.add_message(
@@ -1095,32 +1038,6 @@ def welcome(request):
 
     if avatar_form is None:
         avatar_form = EditAvatarForm()
-
-    if digest_form is None:
-        digest, created = Digest.objects.get_or_create(user=user)
-        initial = {
-            "active": created or digest.active,
-            "all_stories": digest.all_stories,
-            "last_run": digest.last_run,
-        }
-        initial.update(
-            {
-                d[1]: d[0]
-                for d in zip(
-                    digest.days_list,
-                    [
-                        "on_monday",
-                        "on_tuesday",
-                        "on_wednesday",
-                        "on_thursday",
-                        "on_friday",
-                        "on_saturday",
-                        "on_sunday",
-                    ],
-                )
-            }
-        )
-        digest_form = WeeklyDigestForm(initial=initial)
 
     if edit_profile_form is None:
         initial = {
@@ -1142,7 +1059,6 @@ def welcome(request):
             "user": request.user,
             "avatar_form": avatar_form,
             "edit_profile_form": edit_profile_form,
-            "digest_form": digest_form,
         },
     )
 

@@ -85,9 +85,6 @@
     {% else %}
         <h1>submit {% model_verbose_name 'story' False %}</h1>
     {% endif %}
-    {% if config.ENABLE_URL_POSTING %}
-        <p class="help-text">A {% model_verbose_name 'story' False %} can have no <code>url</code>; in that case, the {% model_verbose_name 'story' False %} content is what you put in the description.</p>
-    {% endif %}
     {% if not story %}
         <p class="help-text">You can edit your {% model_verbose_name 'story' False %} after submission to add missing tags or correct mistakes.</p>
     {% endif %}
@@ -95,19 +92,18 @@
         {% if preview %}
             <span>Preview:</span>
             <div class="title">
-                <a href="{{ preview.url }}" class="title">{{ preview.title }}</a>
+                <span class="title">{{ preview.title }}</span>
                 <span class="netloc">{{ preview.domain|default_if_none:"text" }}</span>
                 {% if preview.publish_date %}<span>Published: <time datetime="{{ preview.publish_date | date:"Y-m-d" }}" title="{{ preview.publish_date }}">{{ preview.publish_date|naturalday }}</time></span>{% endif %}
                 {% include "posts/story_tags.html" with tags=preview.tags %}
             </div>
-            <span class="comment preview">{{ preview.description }}</span>
+            <span class="comment preview">{{ preview.content }}</span>
         {% endif %}
         <div class="button-flex-box">
             <input class="heavy-positive-action" type="submit" value="{% if story %}Save{% else %}Submit{% endif %}">
             <input type="submit" name="preview" value="Preview">
         </div>
         {% csrf_token %}
-        {% if config.ENABLE_URL_POSTING %}
             <fieldset>
                 <legend>content</legend>
                 {{ form.title.errors }}
@@ -116,51 +112,12 @@
                     <p class="help-text">{{ form.title.help_text }}</p>
                 {% endif %}
                 {{ form.title }}
-                {{ form.url.errors }}
-                {{ form.url.label_tag }}
-                {% if form.url.help_text %}
-                    <p class="help-text">{{ form.url.help_text }}</p>
+                {{ form.content.errors }}
+                {{ form.content.label_tag }}
+                {% if form.content.help_text %}
+                    <p class="help-text">{{ form.content.help_text }}</p>
                 {% endif %}
-                {{ form.url }}
-                <div class="button-flex-box">
-                    <input type="submit" name="fetch-title" value="fetch title">
-                </div>
-            </fieldset>
-            <details{% if form.description.value or form.content_warning.value %} open{%endif%}>
-                <summary><em>Optional</em>&hairsp;: Set description, content warning</summary>
-                <fieldset>
-                    <legend>content <abbr title="continued">cont'd</abbr></legend>
-                    {{ form.description.errors }}
-                    {{ form.description.label_tag }}
-                    {% if form.description.help_text %}
-                        <p class="help-text">{{ form.description.help_text }}</p>
-                    {% endif %}
-                    {{ form.description }}
-                    <a target="_blank" href="{% url 'formatting_help' %}">Formatting help</a>
-                    {{ form.content_warning.errors }}
-                    {{ form.content_warning.label_tag }}
-                    {% if form.content_warning.help_text %}
-                        <p class="help-text">{{ form.content_warning.help_text }}</p>
-                    {% endif %}
-                    {{ form.content_warning }}
-                </fieldset>
-            </details>
-        {% else %}
-            <fieldset>
-                <legend>content</legend>
-                {{ form.title.errors }}
-                {{ form.title.label_tag }}
-                {% if form.title.help_text %}
-                    <p class="help-text">{{ form.title.help_text }}</p>
-                {% endif %}
-                {{ form.title }}
-                {{ form.url }}
-                {{ form.description.errors }}
-                {{ form.description.label_tag }}
-                {% if form.description.help_text %}
-                    <p class="help-text">{{ form.description.help_text }}</p>
-                {% endif %}
-                {{ form.description }}
+                {{ form.content }}
                 <a target="_blank" href="{% url 'formatting_help' %}">Formatting help</a>
             </fieldset>
             <details>
@@ -175,7 +132,6 @@
                     {{ form.content_warning }}
                 </fieldset>
             </details>
-        {% endif %}
         <fieldset>
             <legend>tags</legend>
             {{ form.tags.errors }}

@@ -76,7 +76,7 @@ class LatestStories(Feed):
         return item.title
 
     def item_description(self, item):
-        return item.description_to_html
+        return item.content_to_html
 
     def item_author_name(self, item):
         return str(item.user)

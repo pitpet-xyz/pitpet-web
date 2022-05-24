@@ -51,45 +51,14 @@ def fts5_setup():
             f"CREATE VIRTUAL TABLE IF NOT EXISTS {config.FTS_COMMENTS_TABLE_NAME} USING fts5(id UNINDEXED, text);"
         )
         connection.execute(
-            f"CREATE TABLE IF NOT EXISTS {config.FTS_STORIES_TABLE_NAME}_content (id INTEGER PRIMARY KEY, title TEXT, description TEXT, url TEXT, remote_content TEXT);"
+            f"CREATE TABLE IF NOT EXISTS {config.FTS_STORIES_TABLE_NAME}_content (id INTEGER PRIMARY KEY, title TEXT, content TEXT);"
         )
         connection.execute(
-            f"CREATE VIRTUAL TABLE IF NOT EXISTS {config.FTS_STORIES_TABLE_NAME} USING fts5(id UNINDEXED, title, description, url, remote_content, content={config.FTS_STORIES_TABLE_NAME}_content, content_rowid=id);"
+            f"CREATE VIRTUAL TABLE IF NOT EXISTS {config.FTS_STORIES_TABLE_NAME} USING fts5(id UNINDEXED, title, content, content={config.FTS_STORIES_TABLE_NAME}_content, content_rowid=id);"
         )
     return connection
 
 
-#        cursor.execute(
-#            f"""CREATE TEMP TRIGGER IF NOT EXISTS on_insert_story_ins AFTER INSERT ON main.sic_storyremotecontent FOR EACH ROW
-# BEGIN
-#    INSERT OR IGNORE INTO {config.FTS_STORIES_TABLE_NAME}_content (id) VALUES (NEW.story_id);
-#    UPDATE {config.FTS_STORIES_TABLE_NAME}_content SET remote_content = NEW.content WHERE id = NEW.story_id;
-#    UPDATE {config.FTS_STORIES_TABLE_NAME} SET remote_content = NEW.content WHERE id = NEW.story_id;
-# END;"""
-#        )
-#        cursor.execute(
-#            f"""CREATE TEMP TRIGGER IF NOT EXISTS on_insert_story_upd AFTER UPDATE of content ON main.sic_storyremotecontent FOR EACH ROW
-# BEGIN
-#    INSERT OR IGNORE INTO {config.FTS_STORIES_TABLE_NAME}_content (id) VALUES (NEW.story_id);
-#    UPDATE {config.FTS_STORIES_TABLE_NAME}_content SET remote_content = NEW.content WHERE id = NEW.story_id;
-#    UPDATE {config.FTS_STORIES_TABLE_NAME} SET remote_content = NEW.content WHERE id = NEW.story_id;
-# END;"""
-#        )
-#        cursor.execute(
-#            f"""CREATE TEMP TRIGGER IF NOT EXISTS on_insert_story_del AFTER DELETE ON main.sic_storyremotecontent FOR EACH ROW
-# BEGIN
-#    INSERT OR IGNORE INTO {config.FTS_STORIES_TABLE_NAME}_content (id) VALUES (NEW.story_id);
-#    UPDATE {config.FTS_STORIES_TABLE_NAME}_content SET remote_content = NULL WHERE id = NEW.story_id;
-#    UPDATE {config.FTS_STORIES_TABLE_NAME} SET remote_content = NULL WHERE id = NEW.story_id;
-# END;"""
-#        )
-#        cursor.execute(
-#            f"""CREATE TRIGGER IF NOT EXISTS {config.FTS_STORIES_TABLE_NAME}_content_ai AFTER INSERT ON {config.FTS_STORIES_TABLE_NAME}_content
-# BEGIN
-#    INSERT INTO {config.FTS_STORIES_TABLE_NAME}(rowid, title, description, url, remote_content)
-#        VALUES (NEW.id, NEW.title, NEW.description, NEW.url, NULL);
-# END;"""
-#        )
 #        cursor.execute(
 #            f"""CREATE TRIGGER IF NOT EXISTS {config.FTS_STORIES_TABLE_NAME}_content_ad AFTER DELETE ON {config.FTS_STORIES_TABLE_NAME}_content
 # BEGIN
@@ -101,8 +70,8 @@ def fts5_setup():
 #            f"""CREATE TRIGGER IF NOT EXISTS {config.FTS_STORIES_TABLE_NAME}_content_au AFTER UPDATE ON {config.FTS_STORIES_TABLE_NAME}_content
 # BEGIN
 #    DELETE FROM {config.FTS_STORIES_TABLE_NAME} WHERE id = OLD.id;
-#    INSERT INTO {config.FTS_STORIES_TABLE_NAME}(rowid, title, description, url, remote_content)
-#        VALUES (NEW.id, NEW.title, NEW.description, NEW.url, NULL);
+#    INSERT INTO {config.FTS_STORIES_TABLE_NAME}(rowid, title, content)
+#        VALUES (NEW.id, NEW.title, NEW.content);
 # END;"""
 #        )
 
@@ -119,28 +88,21 @@ def index_comment(obj: Comment):
 
 def index_story(obj: Story):
     connection = fts5_setup()
-    try:
-        remote_content = obj.remote_content.content
-    except:
-        remote_content = None
     with connection:
         connection.execute(
-            f"INSERT OR REPLACE INTO {config.FTS_STORIES_TABLE_NAME}_content(id, title, description, remote_content) VALUES (:id, :title, :description, :remote_content)",
+            f"INSERT OR REPLACE INTO {config.FTS_STORIES_TABLE_NAME}_content(id, title, content) VALUES (:id, :title, :content)",
             {
                 "id": obj.pk,
                 "title": obj.title,
-                "description": obj.description_to_plain_text.strip(),
-                "remote_content": remote_content,
+                "content": obj.content_to_plain_text.strip(),
             },
         )
         connection.execute(
-            f"INSERT OR REPLACE INTO {config.FTS_STORIES_TABLE_NAME}(rowid, title, description, url, remote_content) VALUES (:id, :title, :description, :url, :remote_content)",
+            f"INSERT OR REPLACE INTO {config.FTS_STORIES_TABLE_NAME}(rowid, title, content) VALUES (:id, :title, :content)",
             {
                 "id": obj.pk,
                 "title": obj.title,
-                "description": obj.description_to_plain_text.strip(),
-                "url": obj.url,
-                "remote_content": remote_content,
+                "content": obj.content_to_plain_text.strip(),
             },
         )
 

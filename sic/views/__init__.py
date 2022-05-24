@@ -463,9 +463,7 @@ def comment_source(request, story_pk, slug, comment_pk=None):
     except Story.DoesNotExist:
         raise Http404("Story does not exist") from Story.DoesNotExist
     if comment_pk is None:
-        return HttpResponse(
-            story_obj.description, content_type="text/plain; charset=utf-8"
-        )
+        return HttpResponse(story_obj.content, content_type="text/plain; charset=utf-8")
     try:
         comment_obj = Comment.objects.get(pk=comment_pk)
     except Comment.DoesNotExist:
@@ -551,29 +549,3 @@ def domain(request, slug, page_num=1):
 
 
 domain.ORDER_BY_FIELDS = ["created", "title"]
-
-
-@require_http_methods(["GET"])
-def story_as_email(request, slug, story_pk):
-    try:
-        story_obj = Story.objects.get(pk=story_pk)
-    except Story.DoesNotExist:
-        raise Http404("Story does not exist") from Story.DoesNotExist
-    return HttpResponse(
-        mail.story_as_email(story_pk), content_type="text/plain; charset=utf-8"
-    )
-
-
-@require_http_methods(["GET"])
-def comment_as_email(request, story_pk, slug, comment_pk):
-    try:
-        story_obj = Story.objects.get(pk=story_pk)
-    except Story.DoesNotExist:
-        raise Http404("Story does not exist") from Story.DoesNotExist
-    try:
-        comment_obj = Comment.objects.get(pk=comment_pk)
-    except Comment.DoesNotExist:
-        raise Http404("Comment does not exist") from Comment.DoesNotExist
-    return HttpResponse(
-        mail.comment_as_email(comment_pk), content_type="text/plain; charset=utf-8"
-    )

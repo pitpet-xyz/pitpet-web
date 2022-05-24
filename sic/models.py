@@ -114,24 +114,27 @@ class StoryKind(models.Model):
 
 
 class Story(models.Model):
+    class MediaKind(models.TextChoices):
+        IMAGE = "IMG", "Image"
+        VIDEO = "VID", "Video"
+
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(
         "User", related_name="stories", on_delete=models.CASCADE, null=False
     )
     title = models.CharField(null=False, blank=False, max_length=100)
-    description = models.TextField(null=True, blank=True)
-    url = URLField(null=True)
-    domain = models.ForeignKey(
-        Domain, on_delete=models.SET_NULL, null=True, default=None, blank=True
+    media_kind = models.CharField(
+        max_length=4,
+        choices=MediaKind.choices,
+        default=MediaKind.IMAGE,
     )
+    media_sha256 = models.CharField(null=True, blank=True, max_length=256)
+    content = models.TextField(null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now_add=True)
     last_active = models.DateTimeField(auto_now_add=True, null=False)
     publish_date = models.DateField(null=True, blank=True)
 
-    merged_into = models.ForeignKey(
-        "Story", on_delete=models.CASCADE, null=True, blank=True
-    )
     active = models.BooleanField(default=True, null=False)
     pinned = models.DateTimeField(default=None, null=True, blank=True)
     user_is_author = models.BooleanField(default=False, null=False)
@@ -168,69 +171,61 @@ class Story(models.Model):
 
     @cached_property
     def get_listing_url(self):
-        return (
-            self.get_absolute_url()
-            if self.url is None or len(self.url) == 0
-            else self.url
-        )
+        return self.get_absolute_url()
 
     @cached_property
     def get_domain(self):
-        if not self.url or len(self.url) == 0:
-            return None
-        if self.domain_id is None:
-            self.save()
-        return self.domain
+        return None
 
     @cached_property
     def hotness(self):
         return config.post_ranking.story_hotness(self)
 
     @cached_property
-    def description_to_html(self):
-        return comment_to_html(self.description)
+    def content_to_html(self):
+        return comment_to_html(self.content)
 
     @cached_property
-    def description_to_plain_text(self):
-        return Textractor.extract(self.description_to_html).strip()
+    def content_to_plain_text(self):
+        return Textractor.extract(self.content_to_html).strip()
 
     @cached_property
     def active_comments(self):
         return self.comments.filter(deleted=False)
 
-    def save(self, *args, **kwargs):
-        if self.url:
-            netloc = urlparse(self.url).netloc
-            if netloc.startswith("www."):
-                netloc = netloc[4:]
-            if len(netloc) > 0:
-                domain_obj, _ = Domain.objects.get_or_create(url=netloc)
-                if domain_obj.is_banned:
-                    self.active = False
-                self.domain = domain_obj
-            if config.ENABLE_FETCHING_REMOTE_CONTENT:
-                from sic.jobs import Job, JobKind, fetch_url
+    # def save(self, *args, **kwargs):
+    #    if self.url:
+    #        netloc = urlparse(self.url).netloc
+    #        if netloc.startswith("www."):
+    #            netloc = netloc[4:]
+    #        if len(netloc) > 0:
+    #            domain_obj, _ = Domain.objects.get_or_create(url=netloc)
+    #            if domain_obj.is_banned:
+    #                self.active = False
+    #            self.domain = domain_obj
+    #        if config.ENABLE_FETCHING_REMOTE_CONTENT:
+    #            from sic.jobs import Job, JobKind, fetch_url
 
-                try:
-                    self.remote_content is None
-                except Story._meta.model.remote_content.RelatedObjectDoesNotExist:
-                    # schedule job
-                    if (
-                        self.pk
-                        and self.url is not None
-                        and len(self.url) != 0
-                        and self.active
-                    ):
-                        kind = JobKind.from_func(fetch_url)
-                        try:
-                            _job_obj, _ = Job.objects.get_or_create(
-                                kind=kind,
-                                periodic=False,
-                                data={"pk": self.pk, "url": self.url},
-                            )
-                        except MultipleObjectsReturned:
-                            pass
-        super().save(*args, **kwargs)
+    #            try:
+    #                self.remote_content is None
+    #            except Story._meta.model.remote_content.RelatedObjectDoesNotExist:
+    #                # schedule job
+    #                if (
+    #                    self.pk
+    #                    and self.url is not None
+    #                    and len(self.url) != 0
+    #                    and self.active
+    #                ):
+    #                    kind = JobKind.from_func(fetch_url)
+    #                    try:
+    #                        _job_obj, _ = Job.objects.get_or_create(
+    #                            kind=kind,
+    #                            periodic=False,
+    #                            data={"pk": self.pk, "url": self.url},
+    #                        )
+    #                    except MultipleObjectsReturned:
+    #                        pass
+    #    super().save(*args, **kwargs)
 
     def is_user_subscribed(self, user: "User") -> bool:
         if not self.active:
@@ -280,11 +275,7 @@ class Story(models.Model):
 
     @cached_property
     def other_submissions(self):
-        if not self.url:
-            return Story.objects.none()
-        return (
-            Story.objects.filter(url=self.url).exclude(pk=self.pk).order_by("-created")
-        )
+        return Story.objects.none()
 
     @property
     def get_message_id(self) -> str:
@@ -298,8 +289,7 @@ class Story(models.Model):
             "id": self.pk,
             "user": str(self.user),
             "title": self.title,
-            "description": self.description_to_plain_text,
-            "url": self.url,
+            "content": self.content_to_plain_text,
             "site_url": self.get_absolute_url(),
             "created": self.created,
             "publish_date": self.publish_date,
@@ -1206,7 +1196,7 @@ class User(PermissionsMixin, AbstractBaseUser):
 
     def frontpage(self):
         taggregations = None
-        qobj = ~Q(story__pk=None)
+        qobj = ~Q(pk=None)
         for f in ExactTagFilter.objects.filter(excluded_in_user=self):
             qobj |= f.as_q()
         for f in DomainFilter.objects.filter(excluded_in_user=self):
@@ -1347,21 +1337,3 @@ class Notification(models.Model):
             if (latest and latest[0])
             else None
         )
-
-
-class StoryRemoteContent(models.Model):
-    story = models.OneToOneField(
-        "Story",
-        related_name="remote_content",
-        on_delete=models.CASCADE,
-        null=False,
-        unique=True,
-        primary_key=True,
-    )
-    url = URLField(null=False, blank=False)
-    content = models.TextField(null=False, blank=False)
-    w3m_content = models.TextField(null=True, blank=True, max_length=16384)
-    retrieved_at = models.DateTimeField(null=False, blank=False, auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.story} {self.url} {len(self.content)} bytes"

@@ -172,9 +172,7 @@ class SicAppConfig(AppConfig):
     @property
     def html_subtitle(self):
         """Override this to change HTML subtitle used in static html"""
-        return mark_safe(
-            "is a community about pets and stories"
-        )
+        return mark_safe("is a community about pets and stories")
 
     @property
     def html_signup_request_info(self):

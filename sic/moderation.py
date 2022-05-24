@@ -84,28 +84,12 @@ class ModerationLogEntry(models.Model):
     def edit_story_desc(before_text: str, story_obj: Story, user: User, reason):
         return ModerationLogEntry.objects.create(
             user=user,
-            action=f"Set story description to {story_obj.description}",
+            action=f"Set story content to {story_obj.content}",
             reason=reason,
             change=json.dumps(
                 {
                     "before": before_text,
-                    "after": story_obj.description,
-                }
-            ),
-            content_type=ContentType.objects.get(app_label="sic", model="story"),
-            object_id=str(story_obj.pk),
-        )
-
-    @staticmethod
-    def edit_story_url(before_text: str, story_obj: Story, user: User, reason):
-        return ModerationLogEntry.objects.create(
-            user=user,
-            action=f"Set story url to {story_obj.url}",
-            reason=reason,
-            change=json.dumps(
-                {
-                    "before": before_text,
-                    "after": story_obj.url,
+                    "after": story_obj.content,
                 }
             ),
             content_type=ContentType.objects.get(app_label="sic", model="story"),
