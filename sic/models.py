@@ -1166,7 +1166,7 @@ class User(PermissionsMixin, AbstractBaseUser):
     def can_participate(self) -> bool:
         "Can post comments, stories?"
         if not self.email_validated:
-            return False
+            return False or self.is_staff
         if config.REQUIRE_VOUCH_FOR_PARTICIPATION:
             try:
                 return self.invited_by is not None

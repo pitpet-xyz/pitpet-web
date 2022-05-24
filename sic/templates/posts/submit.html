@@ -104,8 +104,6 @@
             <input type="submit" name="preview" value="Preview">
         </div>
         {% csrf_token %}
-            <fieldset>
-                <legend>content</legend>
                 {{ form.title.errors }}
                 {{ form.title.label_tag }}
                 {% if form.title.help_text %}
@@ -118,32 +116,29 @@
                     <p class="help-text">{{ form.content.help_text }}</p>
                 {% endif %}
                 {{ form.content }}
-                <a target="_blank" href="{% url 'formatting_help' %}">Formatting help</a>
-            </fieldset>
-            <details>
+            <!--<details>
                 <summary><em>Optional</em>&hairsp;: Set content warning</summary>
-                <fieldset>
-                    <legend>content <abbr title="continued">cont'd</abbr></legend>
                     {{ form.content_warning.errors }}
                     {{ form.content_warning.label_tag }}
                     {% if form.content_warning.help_text %}
                         <p class="help-text">{{ form.content_warning.help_text }}</p>
                     {% endif %}
                     {{ form.content_warning }}
-                </fieldset>
-            </details>
-        <fieldset>
-            <legend>tags</legend>
+            </details -->
+            {{ form.media.errors }}
+            {{ form.media.label_tag }}
+            {% if form.media.help_text %}
+                <p class="help-text">{{ form.media.help_text }}</p>
+            {% endif %}
+            {{ form.media }}
             {{ form.tags.errors }}
             {{ form.tags.label_tag }}
             {% if form.tags.help_text %}
                 <p class="help-text">{{ form.tags.help_text }}</p>
             {% endif %}
             {{ form.tags }}
-        </fieldset>
-        <details>
+        <details style="display: none;">
             <summary><em>Optional</em>&hairsp;: Set publish date, author status (are you the author of this content?), {% model_verbose_name 'story' False %} kind (<abbr title="for example">e.g.</abbr> audio transcript, video, book)</summary>
-            <fieldset>
                 <legend>other metadata</legend>
                 {{ form.publish_date.errors }}
                 {{ form.publish_date.label_tag }}
@@ -163,10 +158,8 @@
                     <p class="help-text">{{ form.kind.help_text }}</p>
                 {% endif %}
                 {{ form.kind }}
-            </fieldset>
         </details>
         {% if form.reason %}
-            <fieldset>
                 <legend>modifications</legend>
                 {{ form.reason.errors }}
                 {{ form.reason.label_tag }}
@@ -174,7 +167,6 @@
                     <p class="help-text">{{ form.reason.help_text }}</p>
                 {% endif %}
                 {{ form.reason }}
-            </fieldset>
         {% endif %}
         <div class="button-flex-box">
             <input class="heavy-positive-action" type="submit" value="{% if story %}Save{% else %}Submit{% endif %}">

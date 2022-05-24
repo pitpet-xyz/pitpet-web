@@ -47,11 +47,9 @@ class SubmitStoryForm(forms.Form):
         if config.ENABLE_URL_POSTING
         else None,
     )
-    url = URLField(
+    media = forms.FileField(
         required=False,
-        widget=forms.Textarea({"rows": 2, "cols": 15, "placeholder": ""})
-        if config.ENABLE_URL_POSTING
-        else forms.HiddenInput,
+        label="Image or video file",
     )
     publish_date = forms.DateField(
         required=False,

@@ -456,6 +456,7 @@ body>main {
   row-gap: min(6vw, 0.8rem);
   width: 100%;
   height: 100%;
+  grid-column: 8 / span 20;
   padding-top: 1rem;
 }
 
