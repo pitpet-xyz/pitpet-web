@@ -13,9 +13,9 @@ from django.utils.safestring import mark_safe
 class SicAppConfig(AppConfig):
     name = "sic"  # python path
     label = "sic"  # python identifier
-    verbose_name = "sic"  # full human readable name
+    verbose_name = "PitPet"  # full human readable name
 
-    subtitle = "is a community about human curiosity and interests."
+    subtitle = "is a community about pets and their lifetimes."
 
     THEME_COLOR_HEX = "#1e82be"
     DARK_THEME_COLOR_HEX = "#15557b"
@@ -72,8 +72,8 @@ class SicAppConfig(AppConfig):
     WEB_PROTOCOL = "http"  # Used when generating URLs, replace with "https" if needed
 
     DEFAULT_FROM_EMAIL = settings.DEFAULT_FROM_EMAIL
-    DIGEST_SUBJECT = "[sic] digest for"
-    INVITATION_SUBJECT = "Your invitation to sic"
+    DIGEST_SUBJECT = "[pitpet] digest for"
+    INVITATION_SUBJECT = "Your invitation to pitpet"
     INVITATION_BODY = "Visit the following url to complete your registration:"
     INVITATION_FROM = DEFAULT_FROM_EMAIL
     NOTIFICATION_FROM = DEFAULT_FROM_EMAIL
@@ -93,22 +93,22 @@ class SicAppConfig(AppConfig):
 
     MENTION_TOKENIZER_NAME = "mention_tokenizer"
 
-    SEND_WEBMENTIONS = True
+    SEND_WEBMENTIONS = False
 
     FORMAT_QUOTED_MESSAGES = True
-    DETECT_USERNAME_MENTIONS_IN_COMMENTS = True
-    MAILING_LIST = True
+    DETECT_USERNAME_MENTIONS_IN_COMMENTS = False
+    MAILING_LIST = False
 
-    SHOW_GIT_REPOSITORY_IN_ABOUT_PAGE = True
-    SHOW_GIT_COMMIT_IN_FOOTER = True
+    SHOW_GIT_REPOSITORY_IN_ABOUT_PAGE = False
+    SHOW_GIT_COMMIT_IN_FOOTER = False
 
-    ALLOW_INVITATION_REQUESTS = True
+    ALLOW_INVITATION_REQUESTS = False
 
     ALLOW_REGISTRATIONS = True
 
-    REQUIRE_VOUCH_FOR_PARTICIPATION = True
+    REQUIRE_VOUCH_FOR_PARTICIPATION = False
 
-    ENABLE_SSH_OTP_LOGIN = True
+    ENABLE_SSH_OTP_LOGIN = False
 
     DISALLOW_REPOSTS_PERIOD: typing.Optional[datetime.timedelta] = datetime.timedelta(
         weeks=1
@@ -118,7 +118,7 @@ class SicAppConfig(AppConfig):
 
     VISIBLE_KARMA = False
 
-    ENABLE_FETCHING_REMOTE_CONTENT = True
+    ENABLE_FETCHING_REMOTE_CONTENT = False
 
     ENABLE_URL_POSTING = True
 
@@ -167,13 +167,13 @@ class SicAppConfig(AppConfig):
     @property
     def html_label(self):
         """Override this to change HTML label used in static html"""
-        return mark_safe("<strong><code>[sic]</code></strong>")
+        return mark_safe("<strong><code>PitPet</code></strong>")
 
     @property
     def html_subtitle(self):
         """Override this to change HTML subtitle used in static html"""
         return mark_safe(
-            "is a community about everything that piques your curiosity and interest"
+            "is a community about pets and stories"
         )
 
     @property

@@ -365,13 +365,13 @@ template {
 }
 
 :root {
-  --fg-color: black;
-  --bg-color: white;
-  --header-bg-color: #eee;
+  --fg-color: #262626;
+  --bg-color: #fafafa;
+  --header-bg-color: #fff;
   --theme-color: #1e82be;
   --upvote-arrow-color:#bbb;
   --upvote-arrow-upvoted-color: #ac130d;
-  --message-success-bg: #dfd;
+  --message-success-bg: #9dbf9d;
   --message-warning-bg: #ffc;
   --message-error-bg: #f77;
   --main-width: 83.3vw;
@@ -413,6 +413,13 @@ template {
   src: local(Inter Bold), url("Inter-Bold.woff2") format("woff2");
 }
 
+@font-face {
+  font-family: 'LeMurmure Regular';
+  font-style:  normal;
+  font-weight: 400;
+  font-display: optional;
+  src: local(LeMurmure Regular), url("LeMurmure-Regular.woff2") format("woff2");
+}
 html, body {
   font-family: "Inter", sans-serif;
   font-size: 1.0625rem;
@@ -449,6 +456,7 @@ body>main {
   row-gap: min(6vw, 0.8rem);
   width: 100%;
   height: 100%;
+  padding-top: 1rem;
 }
 
 body>main nav>ul{
@@ -486,17 +494,30 @@ body>main>hr {
 }
 
 body>header {
-  margin-top: 2rem;
-  margin-bottom: 1.7rem;
+  border-bottom: 1px solid #dbdbdb;
+  padding: 1rem;
+  background-color: #fff;
+  grid-column: 1/span 24;
+
+  min-width: 250px;
+  display: grid;
+  grid-template-columns: repeat(24, minmax(10px, 1fr));
+  grid-auto-rows: auto 1fr auto;
+  row-gap: min(6vw, 0.3rem);
+}
+
+body>header>div {
   display: flex;
   flex-flow: row;
   justify-content: flex-start;
   column-gap: 2rem;
+  grid-column: 3 / span 20;
+
 }
-body>header>nav {
+body>header>div>nav {
   min-width: 0;
 }
-body>header>nav>ul {
+body>header>div>nav>ul {
   list-style: none;
   column-gap: 1rem;
   display: flex;
@@ -507,12 +528,108 @@ body>header>nav>ul {
   padding: 0;
 }
 
-body>header>nav.user {
+body>header>div>nav.user {
   text-align: right;
   margin-left: auto;
 }
-body>header>nav.user>ul{
+body>header>div>nav.user>ul{
   justify-content: flex-end;
+}
+
+#login_link {
+  text-decoration: none;
+  background-color: #0095f6;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  display: block;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 5px 9px;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: inherit;
+  user-select: none;
+  width: auto;
+}
+
+button, [type="button"], [type="reset"], [type="submit"] {
+  text-decoration: none;
+  background-color: #0095f6;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  display: block;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 5px 9px;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: inherit;
+  user-select: none;
+  width: auto;
+}
+
+#signup_link {
+  text-decoration: none;
+  background-color: #fff;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #0095f6;
+  cursor: pointer;
+  display: block;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 5px 9px;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: inherit;
+  user-select: none;
+  width: auto;
+}
+
+input.header-search {
+  background: #efefef;
+  font-size: 16px;
+  border: 0;
+  padding: 3px 16px;
+  color: #262626;
+  outline: 0;
+  z-index: 2;
+  border-radius: 8px;
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+}
+
+
+/* Inline #3 | http://127.0.0.1:8000/ */
+
+#reject-cookies {
+  text-align: reset;
+  display: block;
+  background: #d5d4ec;
+  padding: .5rem 1.5rem 1rem 1.5rem;
+}
+
+#reject-cookies button {
+  background: #4946dd;
+  border: none;
+  color: #fff;
+  padding: 5.5px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+
+body, button, input, textarea {
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height: 18px;
 }
 
 body>footer {
@@ -623,45 +740,28 @@ body>main ul.posts>li.story .links a:visited {
   color: var(--link-color);
 }
 
-header>* {
+header>div>* {
   place-self:center;
   min-width: 0;
 }
 
 header div.logo {
-  font-weight: 800;
-  background-color: var(--theme-color);
-  color: white;
-  height: min-content;
-  width: min-content;
-  min-width: auto;
-  margin-top: -1rem;
-  margin-bottom: -1rem;
-  margin-right: -.5rem;
+  font-family: "LeMurmure Regular";
+  text-transform: lowercase;
+  font-size: 2.5rem;
+  letter-spacing: 0em;
+  line-height: 0px;
+  color: #282828;
 }
 
 header .logo a,
 header .logo a:visited {
   text-decoration: none;
-  color: white;
-  background-color: var(--theme-color);
-  padding: .54rem .35rem;
-  display: inline-block;
-  font-size: 2rem;
-  height: 3.5rem;
+  color: #231044;
 }
 
-header .logo a:hover::before {
-  content: "index";
-  font-size: small;
-  position: absolute;
-  color: var(--fg-color);
-  width: 3.5rem;
-  text-align:center;
-  margin-left: -.35rem;
-  margin-top: 3.1rem;
-  z-index: 1;
-  background: var(--bg-color);
+meter#lifetime {
+  vertical-align: middle;
 }
 
 form.submit-story-form,form.submit-story-form fieldset,form.submit-story-form {
@@ -1478,7 +1578,7 @@ div.showing-aggregations {
   margin-bottom: .5rem;
 }
 
-body>header>div.logo {
+body>header>div>div.logo {
   display: inline-block;
 }
 
@@ -1496,7 +1596,7 @@ body>header>div.logo {
     --main-width: 92vw;
   }
 
-  body>header>div.logo a {
+  body>header>div>div.logo a {
     font-size: 1.4rem;
     padding: .35rem .3rem;
     display: inline-block;
