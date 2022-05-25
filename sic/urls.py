@@ -29,7 +29,6 @@ from sic.views import stories, account, tags, stats, moderation
 from .auth import AuthenticationForm
 from .feeds import LatestStoriesRss, LatestStoriesAtom, user_feeds_rss, user_feeds_atom
 from .webfinger import webfinger
-from sic.webmention import webmention_endpoint
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -421,7 +420,6 @@ urlpatterns = [
         name="favicon",
     ),
     path(".well-known/webfinger/", webfinger, name="webfinger"),
-    path("webmention/", webmention_endpoint, name="webmention_endpoint"),
     re_path(r"^(?P<url>.*/)$", flatviews.flatpage),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

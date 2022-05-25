@@ -158,6 +158,20 @@ class Story(models.Model):
     def slugify(self):
         return slugify(self.title, allow_unicode=True)
 
+    @cached_property
+    def media_url(self) -> str:
+        if self.media_sha256 is not None:
+            from sic.s3 import BucketObject
+
+            try:
+                obj = BucketObject.from_sha256(self.media_sha256)
+                return obj.url()
+            except Exception as exc:
+                print(exc)
+                return None
+        else:
+            return None
+
     def get_absolute_url(self):
 
         return reverse(

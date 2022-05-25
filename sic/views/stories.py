@@ -37,6 +37,14 @@ def story(request, story_pk, slug=None):
         story_obj = Story.objects.get(pk=story_pk)
     except Story.DoesNotExist:
         raise Http404("Story does not exist") from Story.DoesNotExist
+    media = None
+    if story_obj.media_sha256 is not None:
+        from sic.s3 import BucketObject
+
+        obj = BucketObject.from_sha256(story_obj.media_sha256)
+        if obj:
+            media = obj.url()
+
     ongoing_reply_pk = None
     try:
         comment_pk = next(iter(request.session["comment_preview"].keys()))
@@ -85,6 +93,7 @@ def story(request, story_pk, slug=None):
         "posts/story.html",
         {
             "story": story_obj,
+            "media": media,
             "comment_form": form,
             "comments": comments,
             "ongoing_reply_pk": ongoing_reply_pk,
@@ -196,7 +205,7 @@ def submit_story(request):
     preview = None
     if request.method == "POST":
         if "preview" in request.POST:
-            form = SubmitStoryForm(request.POST)
+            form = SubmitStoryForm(request.POST, request.FILES)
             form.is_valid()
             preview = {
                 "content": comment_to_html(request.POST["content"]),
@@ -205,9 +214,17 @@ def submit_story(request):
                 "tags": form.cleaned_data["tags"],
             }
         else:
-            form = SubmitStoryForm(request.POST)
+            form = SubmitStoryForm(request.POST, request.FILES)
             form.fields["title"].required = True
             if form.is_valid():
+                if "media" in request.FILES and request.FILES["media"]:
+                    f = request.FILES["media"]
+                    from sic.s3 import upload_media
+
+                    media_obj = upload_media(f)
+                    media_sha256 = media_obj.hexdigest
+                else:
+                    media_sha256 = None
                 title = form.cleaned_data["title"]
                 content = form.cleaned_data["content"]
                 publish_date = form.cleaned_data["publish_date"]
@@ -215,6 +232,7 @@ def submit_story(request):
                 user_is_author = True
 
                 new_story = Story.objects.create(
+                    media_sha256=media_sha256,
                     title=title,
                     publish_date=publish_date,
                     content=content,

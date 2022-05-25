@@ -8,7 +8,6 @@ from django.utils.safestring import mark_safe
 from sic.models import *
 from sic.moderation import ModerationLogEntry
 from sic.jobs import Job, JobKind
-from sic.webmention import Webmention
 from sic.flatpages import DocumentationFlatPage, CommunityFlatPage, ExternalLinkFlatPage
 from sic.forms import URLField
 
@@ -242,11 +241,6 @@ class ModerationLogEntryAdmin(ModelAdmin):
     list_filter = ["user", "content_type", "is_public"]
 
 
-class WebmentionAdmin(ModelAdmin):
-    ordering = ["-created"]
-    list_display = ["story", "url", "created", "was_received"]
-
-
 @admin.action(description="Run jobs")
 def run_jobs(modeladmin, request, queryset):
     for job in queryset.all():
@@ -344,7 +338,6 @@ admin.site.register(User, UserAdmin)
 admin.site.register(Vote, VoteAdmin)
 admin.site.register(ModerationLogEntry, ModerationLogEntryAdmin)
 admin.site.register(InvitationRequest, InvitationRequestAdmin)
-admin.site.register(Webmention, WebmentionAdmin)
 admin.site.register(Job, JobAdmin)
 admin.site.register(JobKind, JobKindAdmin)
 

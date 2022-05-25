@@ -15,6 +15,8 @@ class SicAppConfig(AppConfig):
     label = "sic"  # python identifier
     verbose_name = "PitPet"  # full human readable name
 
+    S3_BUCKET = "pitpet-object-bucket"
+
     subtitle = "is a community about pets and their lifetimes."
 
     THEME_COLOR_HEX = "#1e82be"
@@ -185,10 +187,11 @@ class SicAppConfig(AppConfig):
 
     def ready(self):
         import sic.notifications
-        import sic.webmention
         import sic.mail
         import sic.jobs
         import sic.flatpages
+        import sic.s3
+        from sic.s3 import Session
 
         def sched_jobs():
             from sic.jobs import Job
@@ -207,6 +210,8 @@ class SicAppConfig(AppConfig):
         self.scheduling_thread = threading.Thread(target=sched_jobs, daemon=True)
         self.scheduling_thread.name = "scheduling_thread"
         self.scheduling_thread.start()
+        self.aws_session = Session()
+        print(f"aws_session = {self.aws_session}")
 
     @staticmethod
     @lru_cache(maxsize=None)

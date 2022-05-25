@@ -125,7 +125,7 @@ class SicBackend(ModelBackend):
             res = self.authenticate(request, username=user.email, password=password)
         return res
 
-    def has_perm(self, user_obj, perm, obj):
+    def has_perm(self, user_obj, perm, obj=None):
         if user_obj.is_staff or user_obj.is_superuser or user_obj.is_moderator:
             return True
         karma = user_obj.karma
