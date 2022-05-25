@@ -29,8 +29,6 @@ class KarmaRanking(PostRanking):
         domain_penalty = 0.0
         tag_hotness = sum(map(lambda t: t.hotness_modifier(), story.tags.all()))
         score = float(story.karma) + tag_hotness - domain_penalty
-        if story.user_is_author and story.url is not None:
-            score += 0.25
         comment_score_modifier = 0
         for c in story.comments.all():
             if c.user_id == user_id:

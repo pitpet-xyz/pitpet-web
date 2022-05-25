@@ -86,7 +86,7 @@
         <h1>submit {% model_verbose_name 'story' False %}</h1>
     {% endif %}
     {% if not story %}
-        <p class="help-text">You can edit your {% model_verbose_name 'story' False %} after submission to add missing tags or correct mistakes.</p>
+        <p class="help-text">You can edit your {% model_verbose_name 'story' False %} after submission.</p>
     {% endif %}
     <form method="post" class="submit-story-form">
         {% if preview %}
@@ -104,19 +104,19 @@
             <input type="submit" name="preview" value="Preview">
         </div>
         {% csrf_token %}
-                {{ form.title.errors }}
-                {{ form.title.label_tag }}
-                {% if form.title.help_text %}
-                    <p class="help-text">{{ form.title.help_text }}</p>
-                {% endif %}
-                {{ form.title }}
-                {{ form.content.errors }}
-                {{ form.content.label_tag }}
-                {% if form.content.help_text %}
-                    <p class="help-text">{{ form.content.help_text }}</p>
-                {% endif %}
-                {{ form.content }}
-            <!--<details>
+        {{ form.title.errors }}
+        {{ form.title.label_tag }}
+        {% if form.title.help_text %}
+            <p class="help-text">{{ form.title.help_text }}</p>
+        {% endif %}
+        {{ form.title }}
+        {{ form.content.errors }}
+        {{ form.content.label_tag }}
+        {% if form.content.help_text %}
+            <p class="help-text">{{ form.content.help_text }}</p>
+        {% endif %}
+        {{ form.content }}
+        <!--<details>
                 <summary><em>Optional</em>&hairsp;: Set content warning</summary>
                     {{ form.content_warning.errors }}
                     {{ form.content_warning.label_tag }}
@@ -125,48 +125,48 @@
                     {% endif %}
                     {{ form.content_warning }}
             </details -->
-            {{ form.media.errors }}
-            {{ form.media.label_tag }}
-            {% if form.media.help_text %}
-                <p class="help-text">{{ form.media.help_text }}</p>
-            {% endif %}
-            {{ form.media }}
-            {{ form.tags.errors }}
-            {{ form.tags.label_tag }}
-            {% if form.tags.help_text %}
-                <p class="help-text">{{ form.tags.help_text }}</p>
-            {% endif %}
-            {{ form.tags }}
+        {{ form.media.errors }}
+        {{ form.media.label_tag }}
+        {% if form.media.help_text %}
+            <p class="help-text">{{ form.media.help_text }}</p>
+        {% endif %}
+        {{ form.media }}
+        {{ form.tags.errors }}
+        {{ form.tags.label_tag }}
+        {% if form.tags.help_text %}
+            <p class="help-text">{{ form.tags.help_text }}</p>
+        {% endif %}
+        {{ form.tags }}
         <details style="display: none;">
             <summary><em>Optional</em>&hairsp;: Set publish date, author status (are you the author of this content?), {% model_verbose_name 'story' False %} kind (<abbr title="for example">e.g.</abbr> audio transcript, video, book)</summary>
-                <legend>other metadata</legend>
-                {{ form.publish_date.errors }}
-                {{ form.publish_date.label_tag }}
-                {% if form.publish_date.help_text %}
-                    <p class="help-text">{{ form.publish_date.help_text }}</p>
-                {% endif %}
-                {{ form.publish_date }}
-                {{ form.user_is_author.errors }}
-                {{ form.user_is_author.label_tag }}
-                {% if form.user_is_author.help_text %}
-                    <p class="help-text">{{ form.user_is_author.help_text }}</p>
-                {% endif %}
-                {{ form.user_is_author }}
-                {{ form.kind.errors }}
-                {{ form.kind.label_tag }}
-                {% if form.kind.help_text %}
-                    <p class="help-text">{{ form.kind.help_text }}</p>
-                {% endif %}
-                {{ form.kind }}
+            <legend>other metadata</legend>
+            {{ form.publish_date.errors }}
+            {{ form.publish_date.label_tag }}
+            {% if form.publish_date.help_text %}
+                <p class="help-text">{{ form.publish_date.help_text }}</p>
+            {% endif %}
+            {{ form.publish_date }}
+            {{ form.user_is_author.errors }}
+            {{ form.user_is_author.label_tag }}
+            {% if form.user_is_author.help_text %}
+                <p class="help-text">{{ form.user_is_author.help_text }}</p>
+            {% endif %}
+            {{ form.user_is_author }}
+            {{ form.kind.errors }}
+            {{ form.kind.label_tag }}
+            {% if form.kind.help_text %}
+                <p class="help-text">{{ form.kind.help_text }}</p>
+            {% endif %}
+            {{ form.kind }}
         </details>
         {% if form.reason %}
-                <legend>modifications</legend>
-                {{ form.reason.errors }}
-                {{ form.reason.label_tag }}
-                {% if form.reason.help_text %}
-                    <p class="help-text">{{ form.reason.help_text }}</p>
-                {% endif %}
-                {{ form.reason }}
+            <legend>modifications</legend>
+            {{ form.reason.errors }}
+            {{ form.reason.label_tag }}
+            {% if form.reason.help_text %}
+                <p class="help-text">{{ form.reason.help_text }}</p>
+            {% endif %}
+            {{ form.reason }}
         {% endif %}
         <div class="button-flex-box">
             <input class="heavy-positive-action" type="submit" value="{% if story %}Save{% else %}Submit{% endif %}">

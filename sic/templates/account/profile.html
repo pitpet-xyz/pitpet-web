@@ -26,19 +26,5 @@
         <section>{{ user.about_to_html }}</section>
     {% endif %}
     <div class="profile-container">
-        {% include "account/profile_include.html" with user=user %}
-        <div class="aggregations">
-            <h2>{% model_verbose_name 'taggregation' True True %}</h2>
-            {% spaceless %}
-                <ul>
-                    {% for c in user.taggregation_subscriptions.all %}
-                        {% user_can_view_taggregation c request as can_view %}
-                        {% if can_view %}
-                            <li><a href="{{c.get_absolute_url }}">{{ c.name }}</a></li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-            {% endspaceless %}
-        </div>
     </div>
 {% endblock %}

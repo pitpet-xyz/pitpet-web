@@ -211,8 +211,9 @@ def index(request, page_num=1):
         has_subscriptions = frontpage["taggregations"] is not None
     else:
         frontpage = Taggregation.default_frontpage()
-    stories = frontpage["stories"]
+    frontpage = Taggregation.default_frontpage()
     taggregations = frontpage["taggregations"]
+    stories = Story.objects.all()
     # https://docs.python.org/3/howto/sorting.html#sort-stability-and-complex-sorts
     all_stories = sorted(
         stories,

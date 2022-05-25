@@ -97,11 +97,11 @@
     <body>
         {% spaceless %}
             <header>
-              <div>
-                <div class="logo">
-                    <a href="{% url 'index' %}" title="index">{{ config.verbose_name }}</a>
-                </div>
-                <!--
+                <div>
+                    <div class="logo">
+                        <a href="{% url 'index' %}" title="index">{{ config.verbose_name }}</a>
+                    </div>
+                    <!--
                 <nav class="main menu">
                     <ul>
                         <li><a href="{% url 'all_stories' %}" id="all_stories_link">All {% model_verbose_name 'story' True True%}</a></li>
@@ -116,39 +116,39 @@
                     </ul>
                 </nav>
                 -->
-                <div><input class="header-search" aria-label="Search input" autocapitalize="none" placeholder="Search" type="text" value=""><div role="dialog"></div><div aria-disabled="false" aria-label="Clear the Search Box" role="button" style="cursor: pointer;" tabindex="0"></div></div>
-                {% if request.user.is_authenticated %}
-                    <nav class="menu user">
-                        <ul>
-                          <li class="lifemeter">
-                            <meter id="lifetime"
-                                   min="0" max="100"
-                                           low="33" high="66" optimum="80"
-                                                              value="50">
-                              at 50/100
-                            </meter>
-                          </li>
-                            <li class="profile account">{% if request.user.avatar and show_avatars %}<a class="avatar-small" href="{{ request.user.get_absolute_url }}"><img class="avatar-small" src="{{request.user.avatar}}" alt="" title="{{ request.user.avatar_title|default_if_none:'' }}" height="18" width="18"></a>{% endif %}<a href="{% url 'account' %}" id="account_link" title="account page">{{ request.user }}</a>{% if unread_messages and unread_messages > 0 %} <a href="{% url 'inbox' %}" id="inbox_link">({{ unread_messages }})</a>{% endif %}</li>
-                            {% with request.user.active_notifications as notifications %}
-                                {% if notifications|length > 0 %}
-                                    <li class="notification"><a href="{% url 'notifications' %}">{{ notifications|length }} notification{{ notifications|pluralize }}</a></li>
+                    <div><input class="header-search" aria-label="Search input" autocapitalize="none" placeholder="Search" type="text" value=""><div role="dialog"></div><div aria-disabled="false" aria-label="Clear the Search Box" role="button" style="cursor: pointer;" tabindex="0"></div></div>
+                    {% if request.user.is_authenticated %}
+                        <nav class="menu user">
+                            <ul>
+                                <li class="lifemeter">
+                                    <meter id="lifetime"
+                                        min="0" max="100"
+                                        low="33" high="66" optimum="80"
+                                        value="50">
+                                        at 50/100
+                                    </meter>
+                                </li>
+                                <li class="profile account">{% if request.user.avatar and show_avatars %}<a class="avatar-small" href="{{ request.user.get_absolute_url }}"><img class="avatar-small" src="{{request.user.avatar}}" alt="" title="{{ request.user.avatar_title|default_if_none:'' }}" height="18" width="18"></a>{% endif %}<a href="{% url 'account' %}" id="account_link" title="account page">{{ request.user }}</a>{% if unread_messages and unread_messages > 0 %} <a href="{% url 'inbox' %}" id="inbox_link">({{ unread_messages }})</a>{% endif %}</li>
+                                {% with request.user.active_notifications as notifications %}
+                                    {% if notifications|length > 0 %}
+                                        <li class="notification"><a href="{% url 'notifications' %}">{{ notifications|length }} notification{{ notifications|pluralize }}</a></li>
+                                    {% endif %}
+                                {% endwith %}
+                                {% if request.user.can_participate %}
+                                    <!--li><a href="{% url 'account_activity' %}" id="activity_link">Activity</a></li-->
+                                    <li><a href="{% url 'submit' %}" id="submit_link" class="button">post story!</a></li>
                                 {% endif %}
-                            {% endwith %}
-                            {% if request.user.can_participate %}
-                                <li><a href="{% url 'account_activity' %}" id="activity_link">Activity</a></li>
-                                <li><a href="{% url 'submit' %}" id="submit_link">Post</a></li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                {% else %}
-                    <nav class="menu user">
-                        <ul>
-                            <li><a href="{% url_with_next 'login' request %}" id="login_link">Login</a></li>
-                            <li><a href="{% url 'signup_help' %}" id="signup_link">Sign up</a></li>
-                        </ul>
-                    </nav>
-                {% endif %}
-              </div>
+                            </ul>
+                        </nav>
+                    {% else %}
+                        <nav class="menu user">
+                            <ul>
+                                <li><a href="{% url_with_next 'login' request %}" id="login_link">Login</a></li>
+                                <li><a href="{% url 'signup_help' %}" id="signup_link">Sign up</a></li>
+                            </ul>
+                        </nav>
+                    {% endif %}
+                </div>
             </header>
         {% endspaceless %}
         <main>
@@ -196,7 +196,7 @@
                 </svg>
             {% endspaceless %}
             {% if not request.user.is_authenticated %}
-            <!--
+                <!--
                 <ul class="messagelist"{% if request.session.show_signup_box %} style="margin:0;"{% endif %}>
                     <li style="padding:0 1rem;display:grid;grid-template-columns:1fr;grid-template-rows:auto auto;width:100%;align-content:center;justify-items:center;{% if request.session.show_signup_box %}height:.1rem;{% endif %}"><p style="text-align:center;{% if request.session.show_signup_box %}transform:scaleY(0.1);{% endif %}">{{ config.html_label }} {{ config.html_subtitle }} <br/>Read <a href="{% url 'signup_help' %}">about getting an account here</a>.</p><form method="POST" class="bookmark_form" action="{% url_with_next 'toggle_signup_box_view' request %}" style="grid-row:1/1;grid-column:2;place-self:end;font-size:{% if request.session.show_signup_box %}x-small{% else %}smaller{% endif %};width:0;">{% csrf_token %}<input type="submit" class="bookmark_link" value="{% if request.session.show_signup_box %}show{% else %}hide{% endif %}" style="padding:.5rem;margin:-.5rem;transform:translateX(-50%){% if request.session.show_signup_box %} translateY(-100%){% endif %};"/></form></li>
                 </ul>
@@ -212,12 +212,12 @@
             {% block content %}<!-- default content text (typically empty) -->{% endblock %}
         </main>
         <div id="reject-cookies">
-          <p>Please reject cookies. Cookies can contain material toxic to pets.</p>
-          <button>Reject cookies</button>
+            <p>Please reject cookies. Cookies can contain material toxic to pets.</p>
+            <button>Reject cookies</button>
         </div>
         <footer>
-          <span>Powered by <img src="https://wasmer.io/images/logo.svg" /></span>
-          <!--
+            <span>Powered by <img src="https://wasmer.io/images/logo.svg" /></span>
+            <!--
             {% spaceless %}
                 <nav class="menu">
                     <ul>

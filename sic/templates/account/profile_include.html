@@ -36,11 +36,11 @@
             </tr>{% endcomment %}
             <tr>
                 <th>{% model_verbose_name 'story' True %}:</th>
-                <td><a href="{% url 'profile_posts' name=user %}">{{ user.stories.count }}</a></td>
+                <td><a href="{% url 'profile' name=user %}">{{ user.stories.count }}</a></td>
             </tr>
             <tr>
                 <th>{% model_verbose_name 'comment' True %}:</th>
-                <td><a href="{% url 'profile_posts' name=user %}">{{ user.comments.count }}</a></td>
+                <td><a href="{% url 'profile' name=user %}">{{ user.comments.count }}</a></td>
             </tr>
         </tbody>
     </table>

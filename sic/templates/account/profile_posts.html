@@ -1,8 +1,30 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% load utils %}
-{% block title %}{{ user }} posts - {{ config.verbose_name }}{% endblock %}
+{% block title %}{{user}} profile - {{ config.verbose_name }}{% endblock %}
 {% block content %}
+    <h1>{{ user }}</h1>
+    <nav>
+        <ul>
+            {% if request.user.is_authenticated %}
+                <li><a href="{% url 'inbox_compose' %}?recipient={{ user|urlencode }}" class="button">Message user</a></li>
+                {% if user.invited_by %}{# raises Exception #}{% elif config.REQUIRE_VOUCH_FOR_PARTICIPATION %}
+                    <li><form method="POST" action="{% url_with_next 'vouch_for_user' user.pk request %}">{% csrf_token %}<input type="submit" value="Vouch for user"></form></li>
+                {% endif %}
+            {% endif %}
+            <li class="lifemeter">
+                <meter id="lifetime"
+                    min="0" max="100"
+                    low="33" high="66" optimum="80"
+                    value="50">
+                    at 50/100
+                </meter>
+            </li>
+        </ul>
+    </nav>
+    {% if user.about %}
+        <section>{{ user.about_to_html }}</section>
+    {% endif %}
     <ul class="posts">
         {% for post in posts %}
             {% if post.is_story %}
@@ -15,7 +37,7 @@
     <nav class="pagination" aria-label="pagination">
         <ul class="pagination">
             {% if posts.has_previous %}
-                <li><a href="{% url 'profile_posts_page' name=user page_num=posts.previous_page_number %}"><span aria-hidden="true">«</span><span class="visuallyhidden">previous page</span></a></li>
+                <li><a href="{% url 'profile_page' name=user page_num=posts.previous_page_number %}"><span aria-hidden="true">«</span><span class="visuallyhidden">previous page</span></a></li>
             {% endif %}
             {% for page in pages %}
                 {% if page == posts.number %}
@@ -23,11 +45,11 @@
                 {% elif page == None %}
                     <li><span aria-hidden="true">&hellip;</span></li>
                 {% else %}
-                    <li><a href="{% url 'profile_posts_page' name=user page_num=page %}"><span class="visuallyhidden">page </span>{{ page }}</a></li>
+                    <li><a href="{% url 'profile_page' name=user page_num=page %}"><span class="visuallyhidden">page </span>{{ page }}</a></li>
                 {% endif %}
             {% endfor %}
             {% if posts.has_next %}
-                <li><a href="{% url 'profile_posts_page' name=user page_num=posts.next_page_number %}"><span class="visuallyhidden">next page</span><span aria-hidden="true">»</span></a></li>
+                <li><a href="{% url 'profile_page' name=user page_num=posts.next_page_number %}"><span class="visuallyhidden">next page</span><span aria-hidden="true">»</span></a></li>
             {% endif %}
         </ul>
     </nav>

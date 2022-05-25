@@ -40,12 +40,10 @@ class SubmitStoryForm(forms.Form):
         min_length=2,
         widget=forms.Textarea({"rows": 2, "cols": 15, "placeholder": ""}),
     )
-    description = forms.CharField(
-        required=not config.ENABLE_URL_POSTING,
+    content = forms.CharField(
+        required=False,
         widget=forms.Textarea({"rows": 5, "cols": 15, "placeholder": ""}),
-        help_text="Write additional context for the submitted link, or your content if your post has no URL."
-        if config.ENABLE_URL_POSTING
-        else None,
+        help_text=None,
     )
     media = forms.FileField(
         required=False,
@@ -59,7 +57,7 @@ class SubmitStoryForm(forms.Form):
     user_is_author = forms.BooleanField(
         label="Author",
         required=False,
-        help_text="I am the author of the content at this URL (or this text)",
+        help_text="",
     )
     tags = forms.ModelMultipleChoiceField(
         queryset=Tag.objects.all().order_by(Lower("name")),

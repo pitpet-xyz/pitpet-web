@@ -82,9 +82,7 @@ class LinkFinder(HTMLParser):
 def story_created_receiver(
     sender, instance, created, raw, using, update_fields, **kwargs
 ):
-    story = instance
-    if not created or story.url is None or len(story.url) == 0 or not story.active:
-        return
+    return
     if not config.SEND_WEBMENTIONS:
         print(
             "config.SEND_WEBMENTIONS = False, not sending webmention for story ",

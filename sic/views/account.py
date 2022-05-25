@@ -440,10 +440,8 @@ def generate_invite(request, invite_pk=None):
 
 def profile_posts(request, name, page_num=1):
     print("profile_posts", name, page_num)
-    if page_num == 1 and request.get_full_path() != reverse(
-        "profile_posts", args=[name]
-    ):
-        return redirect(reverse("profile_posts", args=[name]))
+    if page_num == 1 and request.get_full_path() != reverse("profile", args=[name]):
+        return redirect(reverse("profile", args=[name]))
     try:
         user = User.get_by_display_name(name)
     except User.DoesNotExist:
@@ -465,7 +463,7 @@ def profile_posts(request, name, page_num=1):
         # page_num BooleanFieldis bigger than the actual number of pages
         return redirect(
             reverse(
-                "profile_posts_page",
+                "profile_page",
                 args=[name],
                 kwargs={"page_num": paginator.num_pages},
             )

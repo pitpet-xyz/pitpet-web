@@ -59,12 +59,12 @@
             {{ comment_form.text.errors }}
             <label for="comment-textarea">comment:</label>
             <textarea id=comment-textarea" name="text" cols="40" rows="6" minlength="1" placeholder="" required="">{{ preview_input }}</textarea>
-            <div class="button-flex-box">
-                <input class="heavy-positive-action" type="submit" value="Submit">
-                <input formaction="{% url_with_next 'preview_comment' request %}" type="submit" name="preview" value="Preview">
-                <a target="_blank" href="{% url 'formatting_help' %}">Formatting help</a>
-            </details>
-        </div>
+                <div class="button-flex-box">
+                    <input class="heavy-positive-action" type="submit" value="Submit">
+                    <input formaction="{% url_with_next 'preview_comment' request %}" type="submit" name="preview" value="Preview">
+                    <a target="_blank" href="{% url 'formatting_help' %}">Formatting help</a>
+                </details>
+            </div>
         </form>
     {% elif not request.user.can_participate %}
         <p>You must be vouched for by a vouched user to participate.</p>

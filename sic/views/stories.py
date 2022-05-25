@@ -195,21 +195,7 @@ def submit_story(request):
     user = request.user
     preview = None
     if request.method == "POST":
-        if "fetch-title" in request.POST:
-            qdict = request.POST.copy()
-            if len(qdict["url"]) > 0:
-                parsr = fetch_url_metadata(request, qdict["url"])
-                if parsr:
-                    title = parsr.title
-                    qdict["title"] = title
-                    if parsr.ogtitle is not None:
-                        qdict["title"] = parsr.ogtitle
-                    if parsr.publish_date is not None:
-                        qdict["publish_date"] = parsr.publish_date
-            else:
-                messages.add_message(request, messages.WARNING, "URL field is empty.")
-            form = SubmitStoryForm(qdict)
-        elif "preview" in request.POST:
+        if "preview" in request.POST:
             form = SubmitStoryForm(request.POST)
             form.is_valid()
             preview = {
@@ -239,12 +225,6 @@ def submit_story(request):
                 new_story.tags.set(form.cleaned_data["tags"])
                 new_story.kind.set(form.cleaned_data["kind"])
                 new_story.save()
-                if new_story.domain_id is not None and new_story.domain.is_banned:
-                    messages.add_message(
-                        request,
-                        messages.WARNING,
-                        f"This domain ({new_story.domain}) is banned. Your story has been set to inactive and won't be visible to other users.",
-                    )
                 return redirect(new_story.get_absolute_url())
             form.fields["title"].required = False
             error = form_errors_as_string(form.errors)
@@ -298,34 +278,6 @@ def upvote_story(request, story_pk):
     return redirect(reverse("index"))
 
 
-def fetch_url_metadata(request, url):
-    try:
-        if not check_safe_url(url):
-            raise Exception(f"Invalid URL: {url}.")
-        with urllib.request.urlopen(
-            urllib.request.Request(
-                url,
-                method="GET",
-                headers={
-                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36",
-                },
-            ),
-            timeout=2,
-        ) as response:
-            final_url = response.url
-            if not check_safe_url(url):
-                raise Exception(f"Invalid URL: {url}.")
-            text = response.read().decode("utf-8")
-        parsr = TitleHTMLExtractor()
-        parsr.feed(text)
-        return parsr
-    except Exception as exc:
-        messages.add_message(
-            request, messages.ERROR, f"Could not fetch title. Error: {exc}"
-        )
-        return None
-
-
 @login_required
 @permission_required("sic.change_story", raise_exception=True)
 @transaction.atomic
@@ -339,21 +291,7 @@ def edit_story(request, story_pk, slug=None):
     if not request.user.has_perm("sic.change_story", story_obj):
         raise PermissionDenied("Only the author of the story can edit it.")
     if request.method == "POST":
-        if "fetch-title" in request.POST:
-            qdict = request.POST.copy()
-            if len(qdict["url"]) > 0:
-                parsr = fetch_url_metadata(request, qdict["url"])
-                if parsr:
-                    title = parsr.title
-                    qdict["title"] = title
-                    if parsr.ogtitle is not None:
-                        qdict["title"] = parsr.ogtitle
-                    if parsr.publish_date is not None:
-                        qdict["publish_date"] = parsr.publish_date
-            else:
-                messages.add_message(request, messages.WARNING, "URL field is empty.")
-            form = EditStoryForm(qdict)
-        elif "preview" in request.POST:
+        if "preview" in request.POST:
             form = EditStoryForm(request.POST)
             form.is_valid()
             preview = {
