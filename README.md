@@ -26,6 +26,22 @@ python3 manage.py runserver 0.0.0.0:8000 # or run at public-ip:8000
 
 See [`DEPLOY.md`](DEPLOY.md) for deployment instructions.
 
+## Initialize database with example objects
+
+Seed data files are located under `sic/fixtures`.
+
+```shell
+$ ls sic/fixtures
+tags.json
+```
+
+You can load them in the database with:
+
+```shell
+$ python3 manage.py loaddata tags
+Installed 8 object(s) from 1 fixture(s)
+```
+
 ## Code style
 
 See [`CODE_STYLE.md`](CODE_STYLE.md).

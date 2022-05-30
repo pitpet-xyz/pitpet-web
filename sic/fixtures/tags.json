@@ -1,0 +1,81 @@
+[
+   {
+      "fields" : {
+         "created" : "2022-05-24T13:55:23.342Z",
+         "hex_color" : "#fffff",
+         "name" : "article"
+      },
+      "model" : "sic.storykind",
+      "pk" : 1
+   },
+   {
+      "fields" : {
+         "created" : "2022-05-24T14:04:43.064Z",
+         "hex_color" : "#79f3be",
+         "name" : "party!!",
+         "parents" : []
+      },
+      "model" : "sic.tag",
+      "pk" : 1
+   },
+   {
+      "fields" : {
+         "created" : "2022-05-24T14:06:06.232Z",
+         "hex_color" : "#8a79f3",
+         "name" : "on a walk",
+         "parents" : []
+      },
+      "model" : "sic.tag",
+      "pk" : 2
+   },
+   {
+      "fields" : {
+         "created" : "2022-05-24T14:06:19.693Z",
+         "hex_color" : "#dc79f3",
+         "name" : "great food",
+         "parents" : []
+      },
+      "model" : "sic.tag",
+      "pk" : 3
+   },
+   {
+      "fields" : {
+         "created" : "2022-05-24T14:06:32.193Z",
+         "hex_color" : "#f37f79",
+         "name" : "visitors",
+         "parents" : []
+      },
+      "model" : "sic.tag",
+      "pk" : 4
+   },
+   {
+      "fields" : {
+         "created" : "2022-05-24T14:06:38.188Z",
+         "hex_color" : "#8df379",
+         "name" : "visiting",
+         "parents" : []
+      },
+      "model" : "sic.tag",
+      "pk" : 5
+   },
+   {
+      "fields" : {
+         "created" : "2022-05-24T14:06:42.915Z",
+         "hex_color" : "#9ef379",
+         "name" : "relaxing",
+         "parents" : []
+      },
+      "model" : "sic.tag",
+      "pk" : 6
+   },
+   {
+      "fields" : {
+         "created" : "2022-05-24T14:07:12.540Z",
+         "hex_color" : "#fefc78",
+         "name" : "beach",
+         "parents" : []
+      },
+      "model" : "sic.tag",
+      "pk" : 7
+   }
+]
