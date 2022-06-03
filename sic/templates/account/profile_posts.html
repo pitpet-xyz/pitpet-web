@@ -12,15 +12,16 @@
                     <li><form method="POST" action="{% url_with_next 'vouch_for_user' user.pk request %}">{% csrf_token %}<input type="submit" value="Vouch for user"></form></li>
                 {% endif %}
             {% endif %}
-            <li class="lifemeter">
-                <meter id="lifetime"
-                    min="0" max="100"
-                    low="33" high="66" optimum="80"
-                    value="50">
-                    at 50/100
-                </meter>
-            </li>
-        </ul>
+            {% with user.ttl as user_ttl %}
+                <li class="lifemeter"><span>status: {% if user_ttl.0 == 0 %}dead{% else %}alive{% endif %}</span>
+                    <div id="lifetime"
+                        class="{% if user_ttl.0 == 0 %}dead{% else %}alive{% endif %}"
+                        title="{{ user_ttl.1 }}">
+                        <span style="background-color: var(--color); --width: {{ user_ttl.0  }}; ">
+                        </span></div>
+            {% endwith %}
+        </li>
+    </ul>
     </nav>
     {% if user.about %}
         <section>{{ user.about_to_html }}</section>

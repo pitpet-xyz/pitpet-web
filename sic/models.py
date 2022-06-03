@@ -1112,13 +1112,23 @@ class User(PermissionsMixin, AbstractBaseUser):
     def __str__(self):
         return self.username if self.username else self.email
 
-    @cached_property
+    def reset_ttl_cache(self):
+        key = f"{self}-ttl"
+        cache.delete(key)
+
     def ttl(self):
         from sic import blockchain
+
+        TIMEOUT = 60 * 3
+        key = f"{self}-ttl"
+        cached_val = cache.get(key)
+        if cached_val:
+            return cached_val
 
         try:
             ttl = blockchain.get_ttl(self)
             print("network returned", ttl)
+            cache.set(key, (ttl, ""), timeout=TIMEOUT)
             return ttl, ""
         except Exception as exc:
             print(exc)
@@ -1130,6 +1140,7 @@ class User(PermissionsMixin, AbstractBaseUser):
                     msg = msg["message"]
             except json.JSONDecodeError:
                 pass
+            cache.set(key, (0, msg), timeout=TIMEOUT)
             return 0, msg
 
     def get_by_display_name(name: str) -> "User":

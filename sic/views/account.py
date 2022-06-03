@@ -2,6 +2,7 @@ import re
 import secrets
 import html
 import itertools
+import json
 from datetime import datetime, timedelta
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.core.exceptions import PermissionDenied
@@ -50,6 +51,7 @@ from sic.forms import (
     EditExactTagFilter,
     EditDomainFilter,
     NotifyOnNewInvitationRequests,
+    NewStory,
 )
 
 from sic.views.utils import (
@@ -158,6 +160,7 @@ def view_account(request):
             "generate_invite_form": generate_invite_form,
             "can_add_hats": can_add_hats,
             "hats": hats,
+            "new_story_form": NewStory(),
         },
     )
 
@@ -998,65 +1001,13 @@ def new_invitation_request(request):
 @login_required
 @transaction.atomic
 def welcome(request):
-    avatar_form = None
-    edit_profile_form = None
-    user = request.user
-    if request.method == "POST":
-        avatar_form = EditAvatarForm(request.POST, request.FILES)
-        edit_profile_form = EditProfileForm(request.POST)
-        if avatar_form.is_valid() and edit_profile_form.is_valid():
-            img = avatar_form.cleaned_data["new_avatar"]
-            avatar_title = avatar_form.cleaned_data["avatar_title"]
-            if img:
-                data_url = generate_image_thumbnail(img)
-                user.avatar = data_url
-            user.avatar_title = avatar_title if len(avatar_title) > 0 else None
-            user.homepage = edit_profile_form.cleaned_data["homepage"]
-            user.git_repository = edit_profile_form.cleaned_data["git_repository"]
-            user.about = edit_profile_form.cleaned_data["about"]
-            for i in range(1, 5):
-                field = f"metadata_{i}"
-                label = field + "_label"
-                user._wrapped.__dict__[field] = edit_profile_form.cleaned_data[field]
-                user._wrapped.__dict__[label] = edit_profile_form.cleaned_data[label]
-            user.save()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Welcome aboard! You can familiarise yourself with the website by reading this page.",
-            )
-            return redirect(reverse("help"))
-        error = []
-        for form in [avatar_form, edit_profile_form]:
-            if not form.is_valid():
-                error.append(form_errors_as_string(form.errors))
-        messages.add_message(
-            request, messages.ERROR, f"Invalid form. Error: {','.join(error)}"
-        )
-
-    if avatar_form is None:
-        avatar_form = EditAvatarForm()
-
-    if edit_profile_form is None:
-        initial = {
-            "homepage": user.homepage,
-            "git_repository": user.git_repository,
-            "about": user.about,
-        }
-        for i in range(1, 5):
-            field = f"metadata_{i}"
-            label = field + "_label"
-            initial[field] = user._wrapped.__dict__[field]
-            initial[label] = user._wrapped.__dict__[label]
-        edit_profile_form = EditProfileForm(initial=initial)
-
+    form = NewStory()
     return render(
         request,
         "account/after_signup.html",
         {
             "user": request.user,
-            "avatar_form": avatar_form,
-            "edit_profile_form": edit_profile_form,
+            "form": form,
         },
     )
 
@@ -1396,3 +1347,48 @@ def toggle_signup_box_view(request):
     if "next" in request.GET and check_next_url(request.GET["next"]):
         return redirect(request.GET["next"])
     return redirect(reverse("index"))
+
+
+@login_required
+@transaction.atomic
+@require_http_methods(["POST"])
+def restart_account(request):
+    from sic import blockchain
+    from sic.s3 import upload_media
+
+    form = NewStory(request.POST, request.FILES)
+
+    user = request.user
+    if form.is_valid():
+        password = form.cleaned_data["password"]
+
+        try:
+            media_obj = upload_media(request.FILES["picture"])
+            media_sha256 = media_obj.hexdigest
+            blockchain_data = {
+                "type": "spawn",
+                "username": str(user),
+                "picture_sha256": media_sha256,
+                "previous_story_hash": user.birth_hash if user.birth_hash else None,
+                "date": make_aware(datetime.now()).isoformat(),
+            }
+
+            birth_hash = blockchain.spawn_story(password, json.dumps(blockchain_data))
+            data_url = generate_image_thumbnail(form.cleaned_data["picture"])
+            user.avatar = data_url
+            user.birth_hash = birth_hash
+            user.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                f"You have started a new Pet Story with birth hash {birth_hash}",
+            )
+        except Exception as exc:
+            messages.add_message(
+                request, messages.ERROR, f"Could not start new birth hash: {exc}"
+            )
+    else:
+        error = form_errors_as_string(form.errors)
+        messages.add_message(request, messages.ERROR, f"Invalid form. Error: {error}")
+    user.reset_ttl_cache()
+    return redirect(reverse("account"))

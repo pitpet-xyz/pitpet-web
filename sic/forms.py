@@ -758,3 +758,13 @@ class NotifyOnNewInvitationRequests(forms.Form):
         required=False,
         help_text="Send me a notification whenever a new request arrives.",
     )
+
+
+class NewStory(forms.Form):
+    picture = forms.ImageField(
+        required=True,
+        label="Image file",
+    )
+    password = forms.CharField(
+        required=True, help_text="You must provide a password to start a new Pet Story."
+    )

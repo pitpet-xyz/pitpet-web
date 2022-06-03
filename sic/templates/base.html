@@ -119,12 +119,12 @@
                     {% if request.user.is_authenticated %}
                         <nav class="menu user">
                             <ul>
-                                <li class="lifemeter">{% cache 120 user_ttl request.user %}<span>status: {% if user_ttl.0 == 0 %}dead{% else %}alive{% endif %}</span>
+                                <li class="lifemeter"><span>status: {% if user_ttl.0 == 0 %}dead{% else %}alive{% endif %}</span>
                                     <div id="lifetime"
                                         class="{% if user_ttl.0 == 0 %}dead{% else %}alive{% endif %}"
                                         title="{{ user_ttl.1 }}">
                                         <span style="background-color: var(--color); --width: {{ user_ttl.0  }}; ">
-                                        </span></div>{% endcache %}
+                                        </span></div>
                                 </li>
                                 <li class="profile account">{% if request.user.avatar and show_avatars %}<a class="avatar-small" href="{{ request.user.get_absolute_url }}"><img class="avatar-small" src="{{request.user.avatar}}" alt="" title="{{ request.user.avatar_title|default_if_none:'' }}" height="18" width="18"></a>{% endif %}<a href="{% url 'account' %}" id="account_link" title="account page">{{ request.user }}</a>{% if unread_messages and unread_messages > 0 %} <a href="{% url 'inbox' %}" id="inbox_link">({{ unread_messages }})</a>{% endif %}</li>
                                 {% with request.user.active_notifications as notifications %}
@@ -134,7 +134,11 @@
                                 {% endwith %}
                                 {% if request.user.can_participate %}
                                     <!--li><a href="{% url 'account_activity' %}" id="activity_link">Activity</a></li-->
-                                    <li><a href="{% url 'submit' %}" id="submit_link" class="button">post story!</a></li>
+                                    {% if user_ttl.0 == 0 %}
+                                        <li><a href="{% url 'account' %}#restart" id="submit_link" class="button">restart story!</a></li>
+                                    {% else %}
+                                        <li><a href="{% url 'submit' %}" id="submit_link" class="button">post story!</a></li>
+                                    {% endif %}
                                 {% endif %}
                             </ul>
                         </nav>

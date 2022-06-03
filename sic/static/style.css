@@ -469,7 +469,6 @@ body>main nav>ul{
   justify-content: flex-start;
   flex-flow:wrap;
   margin: 0;
-  width: max-content;
   padding: 0;
   max-width: var(--main-width);
   align-items: center;

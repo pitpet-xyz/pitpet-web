@@ -415,6 +415,11 @@ urlpatterns = [
         name="toggle_signup_box_view",
     ),
     path(
+        "restart_account",
+        account.restart_account,
+        name="restart_account",
+    ),
+    path(
         "favicon.ico",
         RedirectView.as_view(url="static/favicon.ico", permanent=False),
         name="favicon",
