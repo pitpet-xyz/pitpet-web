@@ -2,6 +2,7 @@ from html.parser import HTMLParser
 from datetime import datetime
 import hashlib
 import urllib.request
+import json
 from django.db import transaction
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -30,6 +31,7 @@ from sic.views.utils import (
     check_next_url,
 )
 from sic.moderation import ModerationLogEntry
+from sic import blockchain
 
 
 def story(request, story_pk, slug=None):
@@ -217,33 +219,48 @@ def submit_story(request):
             form = SubmitStoryForm(request.POST, request.FILES)
             form.fields["title"].required = True
             if form.is_valid():
-                if "media" in request.FILES and request.FILES["media"]:
-                    f = request.FILES["media"]
-                    from sic.s3 import upload_media
+                try:
+                    if "media" in request.FILES and request.FILES["media"]:
+                        f = request.FILES["media"]
+                        from sic.s3 import upload_media
 
-                    media_obj = upload_media(f)
-                    media_sha256 = media_obj.hexdigest
-                else:
-                    media_sha256 = None
-                title = form.cleaned_data["title"]
-                content = form.cleaned_data["content"]
-                publish_date = form.cleaned_data["publish_date"]
-                user_is_author = form.cleaned_data["user_is_author"]
-                user_is_author = True
+                        media_obj = upload_media(f)
+                        media_sha256 = media_obj.hexdigest
+                    else:
+                        media_sha256 = None
+                    title = form.cleaned_data["title"]
+                    content = form.cleaned_data["content"]
+                    publish_date = form.cleaned_data["publish_date"]
 
-                new_story = Story.objects.create(
-                    media_sha256=media_sha256,
-                    title=title,
-                    publish_date=publish_date,
-                    content=content,
-                    user=user,
-                    user_is_author=user_is_author,
-                    content_warning=form.cleaned_data["content_warning"],
-                )
-                new_story.tags.set(form.cleaned_data["tags"])
-                new_story.kind.set(form.cleaned_data["kind"])
-                new_story.save()
-                return redirect(new_story.get_absolute_url())
+                    blockchain_data = {
+                        "title": title,
+                        "content": content,
+                        "publish_date": publish_date,
+                        "media_sha256": media_sha256,
+                    }
+
+                    story_hash = blockchain.upload_story(
+                        user.birth_hash, json.dumps(blockchain_data)
+                    )
+
+                    new_story = Story.objects.create(
+                        media_sha256=media_sha256,
+                        story_hash=story_hash,
+                        title=title,
+                        publish_date=publish_date,
+                        content=content,
+                        user=user,
+                        user_is_author=True,
+                        content_warning=form.cleaned_data["content_warning"],
+                    )
+                    new_story.tags.set(form.cleaned_data["tags"])
+                    new_story.kind.set(form.cleaned_data["kind"])
+                    new_story.save()
+                    return redirect(new_story.get_absolute_url())
+                except Exception as exc:
+                    messages.add_message(
+                        request, messages.ERROR, f"Could not submit. {exc}"
+                    )
             form.fields["title"].required = False
             error = form_errors_as_string(form.errors)
             messages.add_message(
@@ -266,7 +283,7 @@ def submit_story(request):
 @login_required
 @transaction.atomic
 def upvote_story(request, story_pk):
-    if request.method == "POST":
+    if request.method == "POST" or request.method == "GET":
         if not config.ENABLE_KARMA:
             return HttpResponseBadRequest("Karma is disabled.")
         user = request.user
@@ -289,8 +306,21 @@ def upvote_story(request, story_pk):
                 vote, created = user.votes.get_or_create(
                     story=story_obj, comment=None, user=user
                 )
-                if not created:
-                    vote.delete()
+                # if not created: Can't delete!
+                #    vote.delete()
+                print(vote, created)
+                if created:
+                    blockchain_data = {
+                        "type": "petmypet",
+                        "target_birth_hash": story_obj.user.birth_hash,
+                        "story_hash": story_obj.story_hash,
+                        "date": vote.created.isoformat(),
+                    }
+                    vote_hash = blockchain.upload_story(
+                        user.birth_hash, json.dumps(blockchain_data)
+                    )
+                    vote.vote_hash = vote_hash
+                    vote.save()
     if "next" in request.GET and check_next_url(request.GET["next"]):
         return redirect(request.GET["next"])
     return redirect(reverse("index"))

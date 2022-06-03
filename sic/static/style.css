@@ -681,9 +681,9 @@ body>main ul.posts li.story + li {
 body>main ul.posts>li.story{
  display: inline-grid;
  width: 100%;
- grid-template-areas: "title" "media" "links";
+ grid-template-areas: "title" "links" "media";
  grid-template-columns: auto;
- grid-template-rows: 1fr auto 1fr;
+ grid-template-rows: auto auto 1fr;
  gap: .2rem;
  column-gap: .2rem;
  row-gap: .1rem;
@@ -693,6 +693,7 @@ body>main ul.posts>li.story{
 }
 
 .story-media {
+  grid-area: media;
   display: block;
   border: 1px solid #c8b593;
 }
@@ -767,8 +768,57 @@ header .logo a:visited {
   color: #231044;
 }
 
-meter#lifetime {
+li.lifemeter {
+  display: inline-flex;
+  gap: .2rem;
+  align-items: center;
+}
+
+li.lifemeter span {
+  font-size: small;
+}
+
+div#lifetime {
   vertical-align: middle;
+  width: 3rem;
+  height: .8rem;
+  display: inline-flex;
+  border-radius: 3px;
+}
+
+div#lifetime span {
+  width: max(calc((var(--width) / 15) * 100%),3%);
+  display: inline-block;
+}
+
+@keyframes deadcolor {
+  0%   { background: #ffbaba; }
+  20%  { background: #ffbaba; }
+  40%  { background: #b30303; }
+  60%  { background: #b30303; }
+  80%  { background: #ffbaba; }
+  100% { background: #ffbaba; }
+}
+
+div#lifetime.dead {
+  --color:red;
+  background: #ffbaba;
+  animation: deadcolor 2s infinite linear;
+}
+
+@keyframes alivecolor {
+  0%   { background: #7cce7c; }
+  20%  { background: #7cce7c; }
+  40%  { background: #26c626; }
+  60%  { background: #26c626; }
+  80%  { background: #7cce7c; }
+  100% { background: #7cce7c; }
+}
+
+div#lifetime.alive {
+  --color: green;
+  background: #7cce7c;
+  animation: alivecolor 2s infinite linear;
 }
 
 form.submit-story-form,form.submit-story-form fieldset,form.submit-story-form {
@@ -969,7 +1019,7 @@ li.profile img.avatar-small {
 }
 
 li.profile a {
-    vertical-align: top;
+    vertical-align: bottom;
 }
 
 a.feed, a.feed:visited {
@@ -1203,7 +1253,6 @@ ul.posts>li {
 
 ul.posts li.story + li,
 ul.posts li.comment + li {
-  padding-top: 1rem;
   border-top: 1px outset var(--entry-separator-color);
 }
 
@@ -1977,4 +2026,18 @@ table.moderation-log tbody tr:nth-child(6n+1) td, table.moderation-log tbody tr:
 }
 table.moderation-log span.no-reason {
     color: #585858;
+}
+
+code.blockhash {
+  font-size: x-small;
+  background: #0000001a;
+  border: 2px solid #0000001a;
+  border-radius: 2px;
+}
+
+span.blockchain-hash-label {
+  font-size: x-small;
+  background: #a614141a;
+  border: 2px solid #a614141a;
+  border-radius: 2px;
 }

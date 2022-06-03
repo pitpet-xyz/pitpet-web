@@ -1,4 +1,4 @@
-{% load utils %}{% load cache %}<!DOCTYPE html>
+{% load utils %}{% load cache %}{% user_ttl as user_ttl %}<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -119,13 +119,12 @@
                     {% if request.user.is_authenticated %}
                         <nav class="menu user">
                             <ul>
-                                <li class="lifemeter">
-                                    <meter id="lifetime"
-                                        min="0" max="100"
-                                        low="33" high="66" optimum="80"
-                                        value="50">
-                                        at 50/100
-                                    </meter>
+                                <li class="lifemeter">{% cache 120 user_ttl request.user %}<span>status: {% if user_ttl.0 == 0 %}dead{% else %}alive{% endif %}</span>
+                                    <div id="lifetime"
+                                        class="{% if user_ttl.0 == 0 %}dead{% else %}alive{% endif %}"
+                                        title="{{ user_ttl.1 }}">
+                                        <span style="background-color: var(--color); --width: {{ user_ttl.0  }}; ">
+                                        </span></div>{% endcache %}
                                 </li>
                                 <li class="profile account">{% if request.user.avatar and show_avatars %}<a class="avatar-small" href="{{ request.user.get_absolute_url }}"><img class="avatar-small" src="{{request.user.avatar}}" alt="" title="{{ request.user.avatar_title|default_if_none:'' }}" height="18" width="18"></a>{% endif %}<a href="{% url 'account' %}" id="account_link" title="account page">{{ request.user }}</a>{% if unread_messages and unread_messages > 0 %} <a href="{% url 'inbox' %}" id="inbox_link">({{ unread_messages }})</a>{% endif %}</li>
                                 {% with request.user.active_notifications as notifications %}

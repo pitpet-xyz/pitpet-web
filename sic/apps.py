@@ -16,6 +16,9 @@ class SicAppConfig(AppConfig):
     verbose_name = "PitPet"  # full human readable name
 
     S3_BUCKET = "pitpet-object-bucket"
+    API_ENDPOINT = (
+        "https://awolro67m3kvcwjrbax67toaj40cllpj.lambda-url.eu-central-1.on.aws/"
+    )
 
     subtitle = "is a community about pets and their lifetimes."
 

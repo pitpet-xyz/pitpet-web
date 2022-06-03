@@ -6,6 +6,7 @@ import abc
 import functools
 import itertools
 import typing
+import json
 from django.db import models, connection, migrations
 from django.db.models import Q
 from django.db.models.expressions import RawSQL
@@ -128,7 +129,8 @@ class Story(models.Model):
         choices=MediaKind.choices,
         default=MediaKind.IMAGE,
     )
-    media_sha256 = models.CharField(null=True, blank=True, max_length=256)
+    media_sha256 = models.CharField(null=True, blank=True, max_length=64)
+    story_hash = models.CharField(null=False, blank=False, max_length=64)
     content = models.TextField(null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now_add=True)
@@ -963,6 +965,7 @@ class Vote(models.Model):
         Comment, related_name="votes", on_delete=models.CASCADE, null=True
     )
     created = models.DateTimeField(auto_now_add=True)
+    vote_hash = models.CharField(null=True, blank=True, max_length=64)
 
     class Meta:
         unique_together = ["user", "story", "comment"]
@@ -1025,6 +1028,7 @@ class User(PermissionsMixin, AbstractBaseUser):
         max_length=255,
         unique=True,
     )
+    birth_hash = models.CharField(null=False, blank=False, max_length=64)
     email_validated = models.BooleanField(default=False, null=False, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     about = models.TextField(null=True, blank=True)
@@ -1107,6 +1111,26 @@ class User(PermissionsMixin, AbstractBaseUser):
 
     def __str__(self):
         return self.username if self.username else self.email
+
+    @cached_property
+    def ttl(self):
+        from sic import blockchain
+
+        try:
+            ttl = blockchain.get_ttl(self)
+            print("network returned", ttl)
+            return ttl, ""
+        except Exception as exc:
+            print(exc)
+            print(f"user {self} got get_ttl error: {exc}")
+            msg = str(exc)
+            try:
+                msg = json.loads(msg)
+                if "message" in msg:
+                    msg = msg["message"]
+            except json.JSONDecodeError:
+                pass
+            return 0, msg
 
     def get_by_display_name(name: str) -> "User":
         try:

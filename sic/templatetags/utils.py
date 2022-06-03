@@ -186,3 +186,11 @@ def model_verbose_name(model_name: str, plural: bool, capitalize: bool = False) 
     if capitalize:
         return ret.capitalize()
     return ret
+
+
+@register.simple_tag(takes_context=True)
+def user_ttl(context):
+    user = context["request"].user
+    if not user.is_authenticated:
+        return False
+    return user.ttl
