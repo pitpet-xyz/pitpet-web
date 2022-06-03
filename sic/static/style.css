@@ -786,9 +786,21 @@ div#lifetime {
   border-radius: 3px;
 }
 
+@keyframes move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50px 50px;
+  }
+}
+
 div#lifetime span {
   width: max(calc((var(--width) / 15) * 100%),3%);
   display: inline-block;
+  animation: move 5s linear infinite;
+  background-image: linear-gradient( -45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent );
+  background-size: 10px 10px;
 }
 
 @keyframes deadcolor {
