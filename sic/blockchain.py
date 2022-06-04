@@ -1,6 +1,8 @@
 import json
+from datetime import datetime, timedelta
 from urllib import request
 from django.apps import apps
+from django.utils.timezone import make_aware
 
 config = apps.get_app_config("sic")
 
@@ -58,3 +60,23 @@ def get_ttl(user):
     birth_hash = user.birth_hash
     json_data = {"type": "getTTL", "birth_hash": birth_hash}
     return send_request(json.dumps(json_data).encode("utf-8"), expects_hash=False)
+
+
+def time_pass_func(job):
+    last_ts = None
+    if "timestamp" in job.data:
+        last_ts = job.data["timestamp"]
+        try:
+            last_ts = datetime.fromisoformat(last_ts)
+        except:
+            last_ts = None
+    now = make_aware(datetime.now())
+    if isinstance(last_ts, datetime):
+        diff = now - last_ts
+        if diff < timedelta(hours=12):
+            return
+    req = {
+        "type": "printGenesis",
+    }
+    genesis_hash = send_request(json.dumps(req).encode("utf-8"))
+    return upload_story(genesis_hash, now.isoformat())

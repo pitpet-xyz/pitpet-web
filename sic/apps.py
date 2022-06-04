@@ -8,6 +8,7 @@ from django.apps import AppConfig
 from django.conf import settings
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
+from django.core.exceptions import MultipleObjectsReturned
 
 
 class SicAppConfig(AppConfig):
@@ -197,7 +198,8 @@ class SicAppConfig(AppConfig):
         from sic.s3 import Session
 
         def sched_jobs():
-            from sic.jobs import Job
+            from sic.jobs import Job, JobKind
+            from sic.blockchain import time_pass_func
             import sched
             import time
 
@@ -206,6 +208,15 @@ class SicAppConfig(AppConfig):
                     job.run()
 
             s = sched.scheduler(time.time, time.sleep)
+            kind = JobKind.from_func(time_pass_func)
+            try:
+                _job_obj, _ = Job.objects.get_or_create(
+                    kind=kind,
+                    periodic=True,
+                    data={},
+                )
+            except MultipleObjectsReturned:
+                pass
             while True:
                 s.enter(15 * 60, 1, exec_fn)
                 s.run(blocking=True)
