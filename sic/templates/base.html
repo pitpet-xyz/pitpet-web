@@ -100,21 +100,6 @@
                     <div class="logo">
                         <a href="{% url 'index' %}" title="index">{{ config.verbose_name }}</a>
                     </div>
-                    <!--
-                <nav class="main menu">
-                    <ul>
-                        <li><a href="{% url 'all_stories' %}" id="all_stories_link">All {% model_verbose_name 'story' True True%}</a></li>
-                        <li><a href="{% url 'recent_comments' %}" id="recent_comments_link">{% model_verbose_name 'comment' True True%}</a></li>
-                        <li><a href="{% url 'personal_aggregations' %}" id="aggregations_link">{% model_verbose_name 'taggregation' True True%}</a></li>
-                        <li><a href="{% url 'browse_tags' %}" id="browse_tags_link">Tags</a></li>
-                        <li><a href="{% url 'search' %}" id="search_link">Search</a></li>
-                        {% if request.user.is_authenticated and request.user.can_participate %}
-                            <li><a href="{% url 'account' %}#generate-invite" id="generate_invite_link">Invite user</a></li>
-                        {% endif %}
-                        {{ header_links }}
-                    </ul>
-                </nav>
-                -->
                     <div><input class="header-search" aria-label="Search input" autocapitalize="none" placeholder="Search" type="text" value=""><div role="dialog"></div><div aria-disabled="false" aria-label="Clear the Search Box" role="button" style="cursor: pointer;" tabindex="0"></div></div>
                     {% if request.user.is_authenticated %}
                         <nav class="menu user">
@@ -132,13 +117,10 @@
                                         <li class="notification"><a href="{% url 'notifications' %}">{{ notifications|length }} notification{{ notifications|pluralize }}</a></li>
                                     {% endif %}
                                 {% endwith %}
-                                {% if request.user.can_participate %}
-                                    <!--li><a href="{% url 'account_activity' %}" id="activity_link">Activity</a></li-->
-                                    {% if user_ttl.0 == 0 %}
-                                        <li><a href="{% url 'account' %}#restart" id="submit_link" class="button">restart story!</a></li>
-                                    {% else %}
-                                        <li><a href="{% url 'submit' %}" id="submit_link" class="button">post story!</a></li>
-                                    {% endif %}
+                                {% if user_ttl.0 == 0 %}
+                                    <li><a href="{% url 'account' %}#restart" id="submit_link" class="button">restart story!</a></li>
+                                {% else %}
+                                    <li><a href="{% url 'submit' %}" id="submit_link" class="button">post story!</a></li>
                                 {% endif %}
                             </ul>
                         </nav>

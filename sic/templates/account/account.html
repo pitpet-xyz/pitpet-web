@@ -48,11 +48,10 @@
     <nav>
         <ul>
             <li><a href="{% url 'edit_settings' %}">Edit Settings</a></li>
-            <li><a href="{% url 'edit_filters' %}">Edit Filters</a></li>
             <li><a href="{% url 'edit_profile' %}">Edit Profile</a></li>
             <li><a href="{% url 'edit_avatar' %}">Edit Avatar</a></li>
             <li><a href="{{ user.get_absolute_url }}">View Profile</a></li>
-            <li><a href="{% url 'bookmarks' %}">Bookmarks</a></li>
+            <li><a href="{% url 'bookmarks' %}">Favourites</a></li>
             <li><a href="{% url 'notifications' %}">Notification History</a></li>
             <li><a href="{% url 'inbox' %}">Message Inbox</a></li>
             <li><a href="{% url 'password_change' %}">Change Password</a></li>
@@ -68,7 +67,6 @@
                 <input type="submit" value="send">
             </form>
         </div>
-        <hr />
     {% endif %}
     {% if user.ttl.0 == 0 %}
         <div class="generate_an_invite" id="restart">

@@ -55,8 +55,6 @@
     <h2>community and contributors</h2>
     <nav class="menu">
         <ul>
-            <li><a href="{% url 'invitation_tree' %}">User invitation tree</a></li>
-            <li><a href="{% url 'about_statistics' %}">Community statistics</a></li>
             {% for flatpage in community_flatpages %}
                 {% if flatpage.show_inline %}
                     {{ flatpage.flatpage_ptr.content|safe }}

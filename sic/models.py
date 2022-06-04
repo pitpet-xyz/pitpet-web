@@ -1128,15 +1128,23 @@ class User(PermissionsMixin, AbstractBaseUser):
         try:
             ttl = blockchain.get_ttl(self)
             print("network returned", ttl)
-            cache.set(key, (ttl, ""), timeout=TIMEOUT)
-            return ttl, ""
+            msg = ""
+            try:
+                d = json.loads(ttl)
+                if isinstance(d, dict) and "message" in d:
+                    msg = d["message"]
+                    ttl = 0
+            except json.JSONDecodeError:
+                pass
+            cache.set(key, (ttl, msg), timeout=TIMEOUT)
+            return ttl, msg
         except Exception as exc:
             print(exc)
             print(f"user {self} got get_ttl error: {exc}")
             msg = str(exc)
             try:
                 msg = json.loads(msg)
-                if "message" in msg:
+                if isinstance(msg, dict) and "message" in msg:
                     msg = msg["message"]
             except json.JSONDecodeError:
                 pass

@@ -1,5 +1,7 @@
 # *PitPet*
 
+Codebase forked from https://github.com/epilys/sic
+
 <table align="center">
 	<tbody>
 		<tr>

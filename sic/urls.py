@@ -25,7 +25,7 @@ from django.views.decorators.cache import cache_page
 from django.contrib.flatpages import views as flatviews
 
 from sic import views
-from sic.views import stories, account, tags, stats, moderation
+from sic.views import stories, account, tags, moderation
 from .auth import AuthenticationForm
 from .feeds import LatestStoriesRss, LatestStoriesAtom, user_feeds_rss, user_feeds_atom
 from .webfinger import webfinger
@@ -46,36 +46,6 @@ urlpatterns = [
         name="help",
     ),
     path("about/invitation-tree/", views.invitation_tree, name="invitation_tree"),
-    path(
-        "about/statistics/",
-        TemplateView.as_view(template_name="about/statistics.html"),
-        name="about_statistics",
-    ),
-    path(
-        "about/statistics/svg/daily_posts/",
-        stats.daily_posts_svg,
-        name="daily_posts_svg",
-    ),
-    path(
-        "about/statistics/svg/registrations/",
-        stats.registrations_svg,
-        name="registrations_svg",
-    ),
-    path(
-        "about/statistics/svg/total-tag-graph/",
-        stats.total_graph_svg,
-        name="total_graph_svg",
-    ),
-    path(
-        "about/statistics/svg/user-tag-graph/",
-        stats.user_graph_svg,
-        name="user_graph_svg",
-    ),
-    path(
-        "about/statistics/svg/upvote-ratio-graph/",
-        stats.upvote_ratio_svg,
-        name="upvote_ratio_svg",
-    ),
     path("moderation-log/", moderation.log, name="moderation_log"),
     path(
         "moderation-log/<int:page_num>/",
@@ -96,12 +66,6 @@ urlpatterns = [
     ),
     path("", views.index, name="index"),
     path("page/<int:page_num>/", views.index, name="index_page"),
-    path("<int:taggregation_pk>/<str:slug>/", views.agg_index, name="agg_index"),
-    path(
-        "<int:taggregation_pk>/<str:slug>/page/<int:page_num>/",
-        views.agg_index,
-        name="agg_index_page",
-    ),
     path("all/", stories.all_stories, name="all_stories"),
     path("all/page/<int:page_num>/", stories.all_stories, name="all_stories_page"),
     path("all/json/", stories.all_stories_json, name="all_stories_json"),
@@ -165,64 +129,6 @@ urlpatterns = [
     path("tags/page/<int:page_num>/", tags.browse_tags, name="browse_tags_page"),
     path("tags/edit/<int:tag_pk>/<str:slug>/", tags.edit_tag, name="edit_tag"),
     path("tags/add/", tags.add_tag, name="add_tag"),
-    path(
-        "tags/graph/",
-        TemplateView.as_view(template_name="tags/tag_graph.html"),
-        name="tag_graph",
-    ),
-    path("tags/graph-svg/", tags.tag_graph_svg, name="tag_graph_svg"),
-    path("aggs/", tags.personal_aggregations, name="personal_aggregations"),
-    path(
-        "aggs/page/<int:page_num>/",
-        tags.personal_aggregations,
-        name="personal_aggregations_page",
-    ),
-    path("aggs/all/", tags.public_aggregations, name="public_aggregations"),
-    path(
-        "aggs/all/page/<int:page_num>/",
-        tags.public_aggregations,
-        name="public_aggregations_page",
-    ),
-    path("aggs/default/", tags.default_aggregations, name="default_aggregations"),
-    path(
-        "aggs/default/page/<int:page_num>/",
-        tags.default_aggregations,
-        name="default_aggregations_page",
-    ),
-    path(
-        "agg/<int:taggregation_pk>/<str:slug>/", tags.taggregation, name="taggregation"
-    ),
-    path(
-        "agg/change-subscription/<int:taggregation_pk>/",
-        tags.taggregation_change_subscription,
-        name="taggregation_change_subscription",
-    ),
-    path(
-        "agg/copy/<int:taggregation_pk>/",
-        tags.copy_taggregation,
-        name="copy_taggregation",
-    ),
-    path(
-        "agg/edit/<int:taggregation_pk>/<str:slug>/",
-        tags.edit_aggregation,
-        name="edit_aggregation",
-    ),
-    path(
-        "agg/edit/<int:taggregation_pk>/<str:slug>/<int:taggregationhastag_id>/",
-        tags.edit_aggregation_filter,
-        name="edit_aggregation_filter",
-    ),
-    path(
-        "agg/edit/<int:taggregation_pk>/<str:slug>/new/",
-        tags.new_aggregation_filter,
-        name="new_aggregation_filter",
-    ),
-    path(
-        "agg/edit/<int:taggregation_pk>/delete-filter/",
-        tags.delete_aggregation_filter,
-        name="delete_aggregation_filter",
-    ),
-    path("agg/new/", tags.new_aggregation, name="new_aggregation"),
     path("accounts/auth_token/new/", account.issue_token, name="issue_token"),
     path(
         "accounts/invitations/requests/",

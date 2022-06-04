@@ -150,7 +150,7 @@ class SicAppConfig(AppConfig):
     ]
 
     MODEL_VERBOSE_NAMES: typing.Dict[str, str] = {
-        #        "story": ("thread", "threads"),
+        "story": ("post", "posts"),
         #        "comment": ("reply", "replies"),
         #       "taggregation": ("topic", "topics"),
     }
