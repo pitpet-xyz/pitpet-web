@@ -223,16 +223,6 @@ urlpatterns = [
         auth_views.PasswordChangeDoneView.as_view(),
         name="password_change_done",
     ),
-    path(
-        "accounts/send-validation-email/",
-        account.send_validation_email,
-        name="send_validation_email",
-    ),
-    path(
-        "accounts/validate-email/<str:token>/",
-        account.validate_email,
-        name="validate_email",
-    ),
     path("accounts/", account.view_account, name="account"),
     path("accounts/activity/", account.my_activity, name="account_activity"),
     path(

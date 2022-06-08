@@ -287,7 +287,7 @@ def upvote_story(request, story_pk):
         if not config.ENABLE_KARMA:
             return HttpResponseBadRequest("Karma is disabled.")
         user = request.user
-        if not request.user.email_validated:
+        if False:  # and not request.user.email_validated:
             messages.add_message(
                 request,
                 messages.ERROR,

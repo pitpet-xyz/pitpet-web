@@ -536,12 +536,6 @@ def signup(request, invite_pk=None):
                     caused_by=user,
                     url=user.get_absolute_url(),
                 )
-            messages.add_message(
-                request,
-                messages.INFO,
-                "You must validate your email address before being able to do anything on the website.",
-            )
-            user.send_validation_email(request)
             return redirect(reverse("welcome"))
     else:
         return redirect(reverse("index"))
@@ -552,41 +546,6 @@ def signup(request, invite_pk=None):
 @require_http_methods(["GET", "POST"])
 def accept_invite(request, invite_pk):
     return signup(request, invite_pk=invite_pk)
-
-
-@login_required
-@transaction.atomic
-@require_http_methods(["POST"])
-def send_validation_email(request):
-    request.user.send_validation_email(request)
-    return redirect("account")
-
-
-@login_required
-@transaction.atomic
-@require_http_methods(["GET", "POST"])
-def validate_email(request, token):
-    user = request.user
-    if user.email_validated:
-        messages.add_message(
-            request, messages.WARNING, "Your email address has already been validated!"
-        )
-        return redirect("index")
-    from sic.auth import EmailValidationToken
-
-    gen = EmailValidationToken()
-    if gen.check_token(user, token):
-        user.email_validated = True
-        user.save(update_fields=["email_validated"])
-        messages.add_message(
-            request, messages.SUCCESS, "Your email address has been validated!"
-        )
-        return redirect("index")
-    else:
-        messages.add_message(
-            request, messages.ERROR, "Link invalid or expired, try sending a new one."
-        )
-        return redirect("account")
 
 
 @login_required
