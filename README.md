@@ -1,5 +1,10 @@
 # *PitPet*
 
+This project is the Python backend powering the PitPet hackathon project at Wasmer.
+Learn more about it here: https://wasmer.io/posts/wasm-on-amazon-lambda-lessons-learned
+
+## How to build
+
 Codebase forked from https://github.com/epilys/sic
 
 <table align="center">
